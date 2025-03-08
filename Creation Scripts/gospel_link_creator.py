@@ -112,6 +112,76 @@ standard_works = [
     {"name": "Articles of Faith", "abbr": "a-of-f", "chapters": 1, "volume": "pgp", "book_id": 406},
 ]
 
+# Blue Letter Bible short codes for OT and NT books
+blb_short_codes = {
+    "Genesis": "gen",
+    "Exodus": "exo",
+    "Leviticus": "lev",
+    "Numbers": "num",
+    "Deuteronomy": "deu",
+    "Joshua": "jos",
+    "Judges": "jdg",
+    "Ruth": "rth",
+    "1 Samuel": "1sa",
+    "2 Samuel": "2sa",
+    "1 Kings": "1ki",
+    "2 Kings": "2ki",
+    "1 Chronicles": "1ch",
+    "2 Chronicles": "2ch",
+    "Ezra": "ezr",
+    "Nehemiah": "neh",
+    "Esther": "est",
+    "Job": "job",
+    "Psalms": "psa",
+    "Proverbs": "pro",
+    "Ecclesiastes": "ecc",
+    "Song of Solomon": "sng",
+    "Isaiah": "isa",
+    "Jeremiah": "jer",
+    "Lamentations": "lam",
+    "Ezekiel": "eze",
+    "Daniel": "dan",
+    "Hosea": "hos",
+    "Joel": "joe",
+    "Amos": "amo",
+    "Obadiah": "oba",
+    "Jonah": "jon",
+    "Micah": "mic",
+    "Nahum": "nah",
+    "Habakkuk": "hab",
+    "Zephaniah": "zep",
+    "Haggai": "hag",
+    "Zechariah": "zec",
+    "Malachi": "mal",
+    "Matthew": "mat",
+    "Mark": "mar",
+    "Luke": "luk",
+    "John": "jhn",
+    "Acts": "act",
+    "Romans": "rom",
+    "1 Corinthians": "1co",
+    "2 Corinthians": "2co",
+    "Galatians": "gal",
+    "Ephesians": "eph",
+    "Philippians": "phl",
+    "Colossians": "col",
+    "1 Thessalonians": "1th",
+    "2 Thessalonians": "2th",
+    "1 Timothy": "1ti",
+    "2 Timothy": "2ti",
+    "Titus": "tit",
+    "Philemon": "phm",
+    "Hebrews": "heb",
+    "James": "jas",
+    "1 Peter": "1pe",
+    "2 Peter": "2pe",
+    "1 John": "1jo",
+    "2 John": "2jo",
+    "3 John": "3jo",
+    "Jude": "jde",
+    "Revelation": "rev"
+}
+
 # Initialize the JSON data structure
 json_data = {}
 
@@ -152,7 +222,7 @@ for book in standard_works:
                 "sci_url": sci_chapter_url  # Scripture Citation Index URL
             }
             
-            # Add Bible Hub and Scripture Toolbox URLs for Old Testament and New Testament books
+            # Add Bible Hub, Scripture Toolbox, and Blue Letter Bible URLs for Old Testament and New Testament books
             if volume in ["ot", "nt"]:
                 # Bible Hub URL
                 bh_book_name = book["name"].lower().replace(" ", "_")
@@ -166,6 +236,16 @@ for book in standard_works:
                 st_book_name = st_book_name.replace(" ", "_")  # Replace remaining spaces with underscores
                 st_chapter_url = f"https://scripturetoolbox.com/html/ic/{st_book_name}/{chapter}.html"
                 chapter_dict["st_url"] = st_chapter_url
+                
+                # Blue Letter Bible URL
+                short_code = blb_short_codes[book["name"]]
+                blb_chapter_url = f"https://www.blueletterbible.org/kjv/{short_code}/{chapter}/"
+                chapter_dict["blb_url"] = blb_chapter_url
+            
+            # Add Isaiah Explained URL specifically for the book of Isaiah
+            if book["name"] == "Isaiah":
+                ie_chapter_url = f"https://www.isaiahexplained.com/chapter/{chapter}"
+                chapter_dict["ie_url"] = ie_chapter_url
             
             chapter_list.append(chapter_dict)
     
@@ -185,4 +265,4 @@ with open('lds_scriptures_urls.json', 'w', encoding='utf-8') as f:
     json.dump(json_data, f, indent=4)
 
 # Confirmation message
-print("JSON file 'lds_scriptures_urls.json' has been created successfully with corrected Scripture Toolbox links.")
+print("JSON file 'lds_scriptures_urls.json' has been created successfully with Blue Letter Bible links for OT and NT chapters.")

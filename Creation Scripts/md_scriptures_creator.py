@@ -112,6 +112,8 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
     sci_url = chapter_links.get("sci_url", "")
     bh_url = chapter_links.get("bh_url", "")
     st_url = chapter_links.get("st_url", "")
+    ie_url = chapter_links.get("ie_url", "")  # Retrieve Isaiah Explained URL
+    blb_url = chapter_links.get("blb_url", "")
 
     with open(file_path, "w", encoding="utf-8") as f:
         # Write front matter
@@ -126,11 +128,19 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
         # Write chapter details with hyperlinks
         f.write(">[!Properties]+ Chapter Details\n")
         if category in ["Old Testament", "New Testament"]:
-            f.write(f">[Gospel Library]({url})    |    [Scripture Citation Index]({sci_url})    |    [Bible Hub]({bh_url})    |    [Inline JST]({st_url})\n")
+            # Start with the base links for all Bible chapters
+            links = f">[Gospel Library]({url})    |    [Citation Index]({sci_url})    |    [Blue Letter Bible]({blb_url})"
+            # Add Inline JST only if the book is not Song of Solomon
+            if book_key != "Song of Solomon":
+                links += f"    |    [Inline JST]({st_url})"
+            # Add Isaiah Explained link for Isaiah chapters
+            if book_key == "Isaiah":
+                links += f"    |    [Isaiah Explained]({ie_url})"
+            f.write(links + "\n")
         else:
-            f.write(f">[Gospel Library]({url})    |    [Scripture Citation Index]({sci_url})\n")
+            f.write(f">[Gospel Library]({url})    |    [Citation Index]({sci_url})\n")
         f.write(">>[!example]- Chapter Summary\n")
-        f.write(">> \n")
+        f.write(">> ^chapter-summary\n")
         f.write("> \n")
         f.write(">\n")
 
@@ -150,7 +160,8 @@ for book in books:
     if not category:
         continue
 
-    category_folder = category
+    # Updated to place category folders inside "Scriptures"
+    category_folder = os.path.join("Scriptures", category)
     os.makedirs(category_folder, exist_ok=True)
 
     if category == "Doctrine and Covenants":

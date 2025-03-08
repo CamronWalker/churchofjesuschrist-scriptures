@@ -1,0 +1,101 @@
+{
+    "title": "Markup Selector",
+    "name": "Markup Selector",
+    "customClassname": "markup-selector",
+    "fields": [
+      {
+        "name": "Type",
+        "label": "",
+        "description": "",
+        "isRequired": false,
+        "input": {
+          "type": "select",
+          "source": "fixed",
+          "options": [
+            {
+              "value": "ul",
+              "label": "Underline"
+            },
+            {
+              "value": "bg",
+              "label": "Highlight"
+            },
+            {
+              "value": "cr",
+              "label": "Circle"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Color Selector",
+        "label": "",
+        "description": "",
+        "isRequired": false,
+        "input": {
+          "type": "select",
+          "source": "fixed",
+          "options": [
+            {
+              "value": "red",
+              "label": "Red"
+            },
+            {
+              "value": "blue",
+              "label": "Blue"
+            },
+            {
+              "value": "green",
+              "label": "Green"
+            },
+            {
+              "value": "yellow",
+              "label": "Yellow"
+            },
+            {
+              "value": "orange",
+              "label": "Orange"
+            },
+            {
+              "value": "cyan",
+              "label": "Cyan"
+            },
+            {
+              "value": "purple",
+              "label": "Purple"
+            },
+            {
+              "value": "pink",
+              "label": "Pink"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Include Footnote",
+        "label": "",
+        "description": "",
+        "isRequired": false,
+        "input": {
+          "type": "toggle",
+          "hidden": false
+        }
+      },
+      {
+        "name": "Footnote",
+        "label": "",
+        "description": "",
+        "isRequired": false,
+        "condition": {
+          "dependencyName": "Include Footnote",
+          "type": "boolean",
+          "value": true
+        },
+        "input": {
+          "type": "textarea",
+          "hidden": false
+        }
+      }
+    ],
+    "version": "1"
+  }
