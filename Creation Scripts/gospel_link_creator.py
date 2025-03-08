@@ -1,6 +1,16 @@
 import json
+import re
 
-# Define the LDS Standard Works with volume, abbreviation, chapter counts, and book IDs
+# Mapping of volume abbreviations to full names for JSON structure
+volume_names = {
+    "ot": "Old Testament",
+    "nt": "New Testament",
+    "bofm": "Book of Mormon",
+    "dc-testament": "Doctrine and Covenants",
+    "pgp": "Pearl of Great Price"
+}
+
+# List of all books in the LDS Standard Works with their details
 standard_works = [
     # Old Testament
     {"name": "Genesis", "abbr": "gen", "chapters": 50, "volume": "ot", "book_id": 101},
@@ -42,6 +52,7 @@ standard_works = [
     {"name": "Haggai", "abbr": "hag", "chapters": 2, "volume": "ot", "book_id": 137},
     {"name": "Zechariah", "abbr": "zech", "chapters": 14, "volume": "ot", "book_id": 138},
     {"name": "Malachi", "abbr": "mal", "chapters": 4, "volume": "ot", "book_id": 139},
+    
     # New Testament
     {"name": "Matthew", "abbr": "matt", "chapters": 28, "volume": "nt", "book_id": 140},
     {"name": "Mark", "abbr": "mark", "chapters": 16, "volume": "nt", "book_id": 141},
@@ -70,11 +81,8 @@ standard_works = [
     {"name": "3 John", "abbr": "3-jn", "chapters": 1, "volume": "nt", "book_id": 164},
     {"name": "Jude", "abbr": "jude", "chapters": 1, "volume": "nt", "book_id": 165},
     {"name": "Revelation", "abbr": "rev", "chapters": 22, "volume": "nt", "book_id": 166},
+    
     # Book of Mormon
-    {"name": "Title Page", "abbr": "title-page", "chapters": 0, "volume": "bofm", "book_id": 201},
-    {"name": "Introduction", "abbr": "introduction", "chapters": 0, "volume": "bofm", "book_id": 202},
-    {"name": "The Testimony of Three Witnesses", "abbr": "three-witnesses", "chapters": 0, "volume": "bofm", "book_id": 203},
-    {"name": "The Testimony of Eight Witnesses", "abbr": "eight-witnesses", "chapters": 0, "volume": "bofm", "book_id": 204},
     {"name": "1 Nephi", "abbr": "1-ne", "chapters": 22, "volume": "bofm", "book_id": 205},
     {"name": "2 Nephi", "abbr": "2-ne", "chapters": 33, "volume": "bofm", "book_id": 206},
     {"name": "Jacob", "abbr": "jacob", "chapters": 7, "volume": "bofm", "book_id": 207},
@@ -104,52 +112,77 @@ standard_works = [
     {"name": "Articles of Faith", "abbr": "a-of-f", "chapters": 1, "volume": "pgp", "book_id": 406},
 ]
 
-# Group books by volume
-volumes = {
-    "Old Testament": [book for book in standard_works if book["volume"] == "ot"],
-    "New Testament": [book for book in standard_works if book["volume"] == "nt"],
-    "Book of Mormon": [book for book in standard_works if book["volume"] == "bofm"],
-    "Doctrine and Covenants": [book for book in standard_works if book["volume"] == "dc-testament"],
-    "Pearl of Great Price": [book for book in standard_works if book["volume"] == "pgp"],
-}
-
-# Generate JSON data
+# Initialize the JSON data structure
 json_data = {}
-for volume_name, books in volumes.items():
-    json_data[volume_name] = []
-    for book in books:
-        book_id = book["book_id"]
-        book_id_hex = f"{book_id:03x}"  # Convert book ID to three-digit hex
-        abbr = book["abbr"]
-        chapters = book["chapters"]
-        # Gospel Library book URL (no chapter number if chapters == 0)
-        gl_book_url = f"https://churchofjesuschrist.org/study/scriptures/{book['volume']}/{abbr}?lang=eng"
-        # Scripture Citation Index book URL
-        sci_book_url = f"https://scriptures.byu.edu/#{book_id_hex}::c{book_id_hex}"
-        
-        # Generate chapter URLs if the book has chapters
-        chapter_list = []
-        if chapters > 0:
-            for chapter in range(1, chapters + 1):
-                chapter_hex = f"{chapter:02x}"  # Convert chapter to two-digit hex
-                gl_chapter_url = f"https://churchofjesuschrist.org/study/scriptures/{book['volume']}/{abbr}/{chapter}?lang=eng"
-                sci_chapter_url = f"https://scriptures.byu.edu/#{book_id_hex}{chapter_hex}::c{book_id_hex}{chapter_hex}"
-                chapter_list.append({
-                    "number": chapter,
-                    "url": gl_chapter_url,
-                    "sci_url": sci_chapter_url
-                })
-        
-        # Add book data to JSON structure
-        json_data[volume_name].append({
-            "name": book["name"],
-            "url": gl_book_url,
-            "sci_url": sci_book_url,
-            "chapters": chapter_list
-        })
 
-# Write JSON data to a file
+# Process each book in the standard works
+for book in standard_works:
+    # Get volume abbreviation and full name
+    volume = book["volume"]
+    volume_name = volume_names[volume]
+    
+    # Initialize volume list if not already present
+    if volume_name not in json_data:
+        json_data[volume_name] = []
+    
+    # Convert book ID to three-digit hexadecimal
+    book_id_hex = f"{book['book_id']:03x}"
+    
+    # Generate book-level URLs
+    gl_book_url = f"https://churchofjesuschrist.org/study/scriptures/{volume}/{book['abbr']}?lang=eng"
+    sci_book_url = f"https://scriptures.byu.edu/#::c{book_id_hex}"
+    
+    # Initialize chapter list
+    chapter_list = []
+    
+    # Generate chapter URLs if the book has chapters
+    if book["chapters"] > 0:
+        for chapter in range(1, book["chapters"] + 1):
+            # Convert chapter number to two-digit hexadecimal
+            chapter_hex = f"{chapter:02x}"
+            
+            # Generate chapter-level URLs
+            gl_chapter_url = f"https://churchofjesuschrist.org/study/scriptures/{volume}/{book['abbr']}/{chapter}?lang=eng"
+            sci_chapter_url = f"https://scriptures.byu.edu/#{book_id_hex}{chapter_hex}::c{book_id_hex}{chapter_hex}"
+            
+            # Create chapter dictionary with Gospel Library and Scripture Citation Index URLs
+            chapter_dict = {
+                "number": chapter,
+                "url": gl_chapter_url,  # Gospel Library URL
+                "sci_url": sci_chapter_url  # Scripture Citation Index URL
+            }
+            
+            # Add Bible Hub and Scripture Toolbox URLs for Old Testament and New Testament books
+            if volume in ["ot", "nt"]:
+                # Bible Hub URL
+                bh_book_name = book["name"].lower().replace(" ", "_")
+                bh_chapter_url = f"https://biblehub.com/{bh_book_name}/{chapter}.htm"
+                chapter_dict["bh_url"] = bh_chapter_url
+                
+                # Scripture Toolbox URL (Fixed for books starting with numbers)
+                st_book_name = book["name"]
+                if re.match(r'^\d', st_book_name):  # Check if book name starts with a digit
+                    st_book_name = re.sub(r'^(\d)\s', r'\1', st_book_name)  # Remove space after digit
+                st_book_name = st_book_name.replace(" ", "_")  # Replace remaining spaces with underscores
+                st_chapter_url = f"https://scripturetoolbox.com/html/ic/{st_book_name}/{chapter}.html"
+                chapter_dict["st_url"] = st_chapter_url
+            
+            chapter_list.append(chapter_dict)
+    
+    # Create book dictionary with all details
+    book_data = {
+        "name": book["name"],
+        "url": gl_book_url,  # Gospel Library URL for the book
+        "sci_url": sci_book_url,  # Scripture Citation Index URL for the book
+        "chapters": chapter_list  # List of chapters with their URLs
+    }
+    
+    # Add book data to the appropriate volume
+    json_data[volume_name].append(book_data)
+
+# Write the JSON data to a file
 with open('lds_scriptures_urls.json', 'w', encoding='utf-8') as f:
     json.dump(json_data, f, indent=4)
 
-print("JSON file 'lds_scriptures_urls.json' has been created successfully.")
+# Confirmation message
+print("JSON file 'lds_scriptures_urls.json' has been created successfully with corrected Scripture Toolbox links.")

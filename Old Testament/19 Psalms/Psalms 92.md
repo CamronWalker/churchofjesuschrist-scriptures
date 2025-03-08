@@ -1,0 +1,44 @@
+---
+publish: true
+tags:
+  - no-graph
+cssclasses:
+  - scriptures
+---
+>[!Properties]+ Chapter Details
+>[Gospel Library](https://churchofjesuschrist.org/study/scriptures/ot/ps/92?lang=eng)    |    [Scripture Citation Index](https://scriptures.byu.edu/#0775c::c0775c)    |    [Bible Hub](https://biblehub.com/psalms/92.htm)    |    [Inline JST](https://scripturetoolbox.com/html/ic/Psalms/92.html)
+>>[!example]- Chapter Summary
+>> 
+> 
+>
+>#Scripture/OT
+###### 1
+1 It is a good thing to give thanks unto the Lord, and to sing praises unto thy name, O most High:
+###### 2
+2 To shew forth thy lovingkindness in the morning, and thy faithfulness every night,
+###### 3
+3 Upon an instrument of ten strings, and upon the psaltery; upon the harp with a solemn sound.
+###### 4
+4 For thou, Lord, hast made me glad through thy work: I will triumph in the works of thy hands.
+###### 5
+5 O Lord, how great are thy works! and thy thoughts are very deep.
+###### 6
+6 A brutish man knoweth not; neither doth a fool understand this.
+###### 7
+7 When the wicked spring as the grass, and when all the workers of iniquity do flourish; it is that they shall be destroyed for ever:
+###### 8
+8 But thou, Lord, art most high for evermore.
+###### 9
+9 For, lo, thine enemies, O Lord, for, lo, thine enemies shall perish; all the workers of iniquity shall be scattered.
+###### 10
+10 But my horn shalt thou exalt like the horn of an unicorn: I shall be anointed with fresh oil.
+###### 11
+11 Mine eye also shall see my desire on mine enemies, and mine ears shall hear my desire of the wicked that rise up against me.
+###### 12
+12 The righteous shall flourish like the palm tree: he shall grow like a cedar in Lebanon.
+###### 13
+13 Those that be planted in the house of the Lord shall flourish in the courts of our God.
+###### 14
+14 They shall still bring forth fruit in old age; they shall be fat and flourishing;
+###### 15
+15 To shew that the Lord is upright: he is my rock, and there is no unrighteousness in him.

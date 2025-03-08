@@ -1,0 +1,50 @@
+---
+publish: true
+tags:
+  - no-graph
+cssclasses:
+  - scriptures
+---
+>[!Properties]+ Chapter Details
+>[Gospel Library](https://churchofjesuschrist.org/study/scriptures/ot/ps/83?lang=eng)    |    [Scripture Citation Index](https://scriptures.byu.edu/#07753::c07753)    |    [Bible Hub](https://biblehub.com/psalms/83.htm)    |    [Inline JST](https://scripturetoolbox.com/html/ic/Psalms/83.html)
+>>[!example]- Chapter Summary
+>> 
+> 
+>
+>#Scripture/OT
+###### 1
+1 Keep not thou silence, O God: hold not thy peace, and be not still, O God.
+###### 2
+2 For, lo, thine enemies make a tumult: and they that hate thee have lifted up the head.
+###### 3
+3 They have taken crafty counsel against thy people, and consulted against thy hidden ones.
+###### 4
+4 They have said, Come, and let us cut them off from being a nation; that the name of Israel may be no more in remembrance.
+###### 5
+5 For they have consulted together with one consent: they are confederate against thee:
+###### 6
+6 The tabernacles of Edom, and the Ishmaelites; of Moab, and the Hagarenes;
+###### 7
+7 Gebal, and Ammon, and Amalek; the Philistines with the inhabitants of Tyre;
+###### 8
+8 Assur also is joined with them: they have holpen the children of Lot. Selah.
+###### 9
+9 Do unto them as unto the Midianites; as to Sisera, as to Jabin, at the brook of Kison:
+###### 10
+10 Which perished at En-dor: they became as dung for the earth.
+###### 11
+11 Make their nobles like Oreb, and like Zeeb: yea, all their princes as Zebah, and as Zalmunna:
+###### 12
+12 Who said, Let us take to ourselves the houses of God in possession.
+###### 13
+13 O my God, make them like a wheel; as the stubble before the wind.
+###### 14
+14 As the fire burneth a wood, and as the flame setteth the mountains on fire;
+###### 15
+15 So persecute them with thy tempest, and make them afraid with thy storm.
+###### 16
+16 Fill their faces with shame; that they may seek thy name, O Lord.
+###### 17
+17 Let them be confounded and troubled for ever; yea, let them be put to shame, and perish:
+###### 18
+18 That men may know that thou, whose name alone is Jehovah, art the most high over all the earth.

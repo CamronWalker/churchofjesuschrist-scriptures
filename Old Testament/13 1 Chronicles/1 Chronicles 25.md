@@ -1,0 +1,76 @@
+---
+publish: true
+tags:
+  - no-graph
+cssclasses:
+  - scriptures
+---
+>[!Properties]+ Chapter Details
+>[Gospel Library](https://churchofjesuschrist.org/study/scriptures/ot/1-chr/25?lang=eng)    |    [Scripture Citation Index](https://scriptures.byu.edu/#07119::c07119)    |    [Bible Hub](https://biblehub.com/1_chronicles/25.htm)    |    [Inline JST](https://scripturetoolbox.com/html/ic/1Chronicles/25.html)
+>>[!example]- Chapter Summary
+>> 
+> 
+>
+>#Scripture/OT
+###### 1
+1 Moreover David and the captains of the host separated to the service of the sons of Asaph, and of Heman, and of Jeduthun, who should prophesy with harps, with psalteries, and with cymbals: and the number of the workmen according to their service was:
+###### 2
+2 Of the sons of Asaph; Zaccur, and Joseph, and Nethaniah, and Asarelah, the sons of Asaph under the hands of Asaph, which prophesied according to the order of the king.
+###### 3
+3 Of Jeduthun: the sons of Jeduthun; Gedaliah, and Zeri, and Jeshaiah, Hashabiah, and Mattithiah, six, under the hands of their father Jeduthun, who prophesied with a harp, to give thanks and to praise the Lord.
+###### 4
+4 Of Heman: the sons of Heman; Bukkiah, Mattaniah, Uzziel, Shebuel, and Jerimoth, Hananiah, Hanani, Eliathah, Giddalti, and Romamti-ezer, Joshbekashah, Mallothi, Hothir, and Mahazioth:
+###### 5
+5 All these were the sons of Heman the king's seer in the words of God, to lift up the horn. And God gave to Heman fourteen sons and three daughters.
+###### 6
+6 All these were under the hands of their father for song in the house of the Lord, with cymbals, psalteries, and harps, for the service of the house of God, according to the king's order to Asaph, Jeduthun, and Heman.
+###### 7
+7 So the number of them, with their brethren that were instructed in the songs of the Lord, even all that were cunning, was two hundred fourscore and eight.
+###### 8
+8 And they cast lots, ward against ward, as well the small as the great, the teacher as the scholar.
+###### 9
+9 Now the first lot came forth for Asaph to Joseph: the second to Gedaliah, who with his brethren and sons were twelve:
+###### 10
+10 The third to Zaccur, he, his sons, and his brethren, were twelve:
+###### 11
+11 The fourth to Izri, he, his sons, and his brethren, were twelve:
+###### 12
+12 The fifth to Nethaniah, he, his sons, and his brethren, were twelve:
+###### 13
+13 The sixth to Bukkiah, he, his sons, and his brethren, were twelve:
+###### 14
+14 The seventh to Jesharelah, he, his sons, and his brethren, were twelve:
+###### 15
+15 The eighth to Jeshaiah, he, his sons, and his brethren, were twelve:
+###### 16
+16 The ninth to Mattaniah, he, his sons, and his brethren, were twelve:
+###### 17
+17 The tenth to Shimei, he, his sons, and his brethren, were twelve:
+###### 18
+18 The eleventh to Azareel, he, his sons, and his brethren, were twelve:
+###### 19
+19 The twelfth to Hashabiah, he, his sons, and his brethren, were twelve:
+###### 20
+20 The thirteenth to Shubael, he, his sons, and his brethren, were twelve:
+###### 21
+21 The fourteenth to Mattithiah, he, his sons, and his brethren, were twelve:
+###### 22
+22 The fifteenth to Jeremoth, he, his sons, and his brethren, were twelve:
+###### 23
+23 The sixteenth to Hananiah, he, his sons, and his brethren, were twelve:
+###### 24
+24 The seventeenth to Joshbekashah, he, his sons, and his brethren, were twelve:
+###### 25
+25 The eighteenth to Hanani, he, his sons, and his brethren, were twelve:
+###### 26
+26 The nineteenth to Mallothi, he, his sons, and his brethren, were twelve:
+###### 27
+27 The twentieth to Eliathah, he, his sons, and his brethren, were twelve:
+###### 28
+28 The one and twentieth to Hothir, he, his sons, and his brethren, were twelve:
+###### 29
+29 The two and twentieth to Giddalti, he, his sons, and his brethren, were twelve:
+###### 30
+30 The three and twentieth to Mahazioth, he, his sons, and his brethren, were twelve:
+###### 31
+31 The four and twentieth to Romamti-ezer, he, his sons, and his brethren, were twelve.

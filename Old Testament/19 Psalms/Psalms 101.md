@@ -1,0 +1,30 @@
+---
+publish: true
+tags:
+  - no-graph
+cssclasses:
+  - scriptures
+---
+>[!Properties]+ Chapter Details
+>[Gospel Library](https://churchofjesuschrist.org/study/scriptures/ot/ps/101?lang=eng)    |    [Scripture Citation Index](https://scriptures.byu.edu/#07765::c07765)    |    [Bible Hub](https://biblehub.com/psalms/101.htm)    |    [Inline JST](https://scripturetoolbox.com/html/ic/Psalms/101.html)
+>>[!example]- Chapter Summary
+>> 
+> 
+>
+>#Scripture/OT
+###### 1
+1 I will sing of mercy and judgment: unto thee, O Lord, will I sing.
+###### 2
+2 I will behave myself wisely in a perfect way. O when wilt thou come unto me? I will walk within my house with a perfect heart.
+###### 3
+3 I will set no wicked thing before mine eyes: I hate the work of them that turn aside; it shall not cleave to me.
+###### 4
+4 A froward heart shall depart from me: I will not know a wicked person.
+###### 5
+5 Whoso privily slandereth his neighbour, him will I cut off: him that hath an high look and a proud heart will not I suffer.
+###### 6
+6 Mine eyes shall be upon the faithful of the land, that they may dwell with me: he that walketh in a perfect way, he shall serve me.
+###### 7
+7 He that worketh deceit shall not dwell within my house: he that telleth lies shall not tarry in my sight.
+###### 8
+8 I will early destroy all the wicked of the land; that I may cut off all wicked doers from the city of the Lord.

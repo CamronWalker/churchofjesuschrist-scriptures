@@ -22,7 +22,7 @@ bom_books = [
     "Alma", "Helaman", "3 Nephi", "4 Nephi", "Mormon", "Ether", "Moroni"
 ]
 pogp_books = [
-    "Moses", "Abraham", "Joseph Smith—Matthew", "Joseph Smith—History", "Articles of Faith"
+    "Moses", "Abraham", "Joseph Smith--Matthew", "Joseph Smith--History", "Articles of Faith"
 ]
 
 # Load the JSON file with hyperlinks
@@ -37,13 +37,8 @@ for category, books in json_data.items():
         links_dict[book_name] = {}
         for chapter in book['chapters']:
             chapter_num = str(chapter['number'])
-            links_dict[book_name][chapter_num] = {
-                "gospel_library": chapter['url'],
-                "scripture_citation_index": chapter['sci_url']
-            }
-
-# Debug: Print available books in links_dict to verify JSON loading
-print("Books available in links_dict:", list(links_dict.keys()))
+            # Include all URLs for the chapter, excluding 'number'
+            links_dict[book_name][chapter_num] = {k: v for k, v in chapter.items() if k != 'number'}
 
 # Initialize a dictionary to hold the verses
 books = {}
@@ -92,7 +87,7 @@ def normalize_book_name(book):
         num = book.split("--")[1]
         return f"Official Declaration {num}"
     else:
-        return book.replace("--", "—")  # Replace double hyphens with em dash for books like Joseph Smith—Matthew
+        return book.replace("--", "—")  # Replace double hyphens with em dash
 
 # Function to write a chapter file
 def write_chapter_file(file_path, book, chapter, verses, links_dict):
@@ -111,14 +106,12 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
 
     # Normalize the book name for looking up in links_dict
     book_key = normalize_book_name(book)
-    # Debug: Print the book and normalized key to verify
-    print(f"Processing book: '{book}', normalized to: '{book_key}', chapter: {chapter}")
-    # Retrieve hyperlinks, defaulting to empty strings if not found
-    gospel_library = links_dict.get(book_key, {}).get(chapter, {}).get("gospel_library", "")
-    citation_index = links_dict.get(book_key, {}).get(chapter, {}).get("scripture_citation_index", "")
-    # Debug: Print the retrieved links
-    if not gospel_library or not citation_index:
-        print(f"No links found for {book_key} chapter {chapter}")
+    # Retrieve chapter links
+    chapter_links = links_dict.get(book_key, {}).get(chapter, {})
+    url = chapter_links.get("url", "")
+    sci_url = chapter_links.get("sci_url", "")
+    bh_url = chapter_links.get("bh_url", "")
+    st_url = chapter_links.get("st_url", "")
 
     with open(file_path, "w", encoding="utf-8") as f:
         # Write front matter
@@ -132,7 +125,10 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
 
         # Write chapter details with hyperlinks
         f.write(">[!Properties]+ Chapter Details\n")
-        f.write(f">[Gospel Library]({gospel_library})    |    [Citation Index]({citation_index})\n")
+        if category in ["Old Testament", "New Testament"]:
+            f.write(f">[Gospel Library]({url})    |    [Scripture Citation Index]({sci_url})    |    [Bible Hub]({bh_url})    |    [Inline JST]({st_url})\n")
+        else:
+            f.write(f">[Gospel Library]({url})    |    [Scripture Citation Index]({sci_url})\n")
         f.write(">>[!example]- Chapter Summary\n")
         f.write(">> \n")
         f.write("> \n")
@@ -142,11 +138,11 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
         if tag:
             f.write(f">#{tag}\n")
 
-        # Write verses in order
+        # Write verses with verse number prepended to the text
         for verse_num in sorted(verses.keys()):
             verse_text = verses[verse_num]
             f.write(f"###### {verse_num}\n")
-            f.write(f"{verse_text}\n")
+            f.write(f"{verse_num} {verse_text}\n")
 
 # Create the folder structure and files
 for book in books:
@@ -176,7 +172,7 @@ for book in books:
             "Book of Mormon": bom_books,
             "Pearl of Great Price": pogp_books
         }[category]
-        # Normalize book name for folder creation if necessary
+        # Normalize book name for folder creation
         book_for_folder = book.replace("—", "--")
         book_index = book_list.index(book_for_folder) + 1 if book_for_folder in book_list else book_list.index(book) + 1
         book_folder = f"{book_index:02d} {book_for_folder}"

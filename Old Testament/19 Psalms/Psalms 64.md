@@ -1,0 +1,34 @@
+---
+publish: true
+tags:
+  - no-graph
+cssclasses:
+  - scriptures
+---
+>[!Properties]+ Chapter Details
+>[Gospel Library](https://churchofjesuschrist.org/study/scriptures/ot/ps/64?lang=eng)    |    [Scripture Citation Index](https://scriptures.byu.edu/#07740::c07740)    |    [Bible Hub](https://biblehub.com/psalms/64.htm)    |    [Inline JST](https://scripturetoolbox.com/html/ic/Psalms/64.html)
+>>[!example]- Chapter Summary
+>> 
+> 
+>
+>#Scripture/OT
+###### 1
+1 Hear my voice, O God, in my prayer: preserve my life from fear of the enemy.
+###### 2
+2 Hide me from the secret counsel of the wicked; from the insurrection of the workers of iniquity:
+###### 3
+3 Who whet their tongue like a sword, and bend their bows to shoot their arrows, even bitter words:
+###### 4
+4 That they may shoot in secret at the perfect: suddenly do they shoot at him, and fear not.
+###### 5
+5 They encourage themselves in an evil matter: they commune of laying snares privily; they say, Who shall see them?
+###### 6
+6 They search out iniquities; they accomplish a diligent search: both the inward thought of every one of them, and the heart, is deep.
+###### 7
+7 But God shall shoot at them with an arrow; suddenly shall they be wounded.
+###### 8
+8 So they shall make their own tongue to fall upon themselves: all that see them shall flee away.
+###### 9
+9 And all men shall fear, and shall declare the work of God; for they shall wisely consider of his doing.
+###### 10
+10 The righteous shall be glad in the Lord, and shall trust in him; and all the upright in heart shall glory.

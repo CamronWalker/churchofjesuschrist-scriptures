@@ -1,0 +1,50 @@
+---
+publish: true
+tags:
+  - no-graph
+cssclasses:
+  - scriptures
+---
+>[!Properties]+ Chapter Details
+>[Gospel Library](https://churchofjesuschrist.org/study/scriptures/nt/2-tim/1?lang=eng)    |    [Scripture Citation Index](https://scriptures.byu.edu/#09b01::c09b01)    |    [Bible Hub](https://biblehub.com/2_timothy/1.htm)    |    [Inline JST](https://scripturetoolbox.com/html/ic/2Timothy/1.html)
+>>[!example]- Chapter Summary
+>> 
+> 
+>
+>#Scripture/NT
+###### 1
+1 Paul, an apostle of Jesus Christ by the will of God, according to the promise of life which is in Christ Jesus,
+###### 2
+2 To Timothy, my dearly beloved son: Grace, mercy, and peace, from God the Father and Christ Jesus our Lord.
+###### 3
+3 I thank God, whom I serve from my forefathers with pure conscience, that without ceasing I have remembrance of thee in my prayers night and day;
+###### 4
+4 Greatly desiring to see thee, being mindful of thy tears, that I may be filled with joy;
+###### 5
+5 When I call to remembrance the unfeigned faith that is in thee, which dwelt first in thy grandmother Lois, and thy mother Eunice; and I am persuaded that in thee also.
+###### 6
+6 Wherefore I put thee in remembrance that thou stir up the gift of God, which is in thee by the putting on of my hands.
+###### 7
+7 For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind.
+###### 8
+8 Be not thou therefore ashamed of the testimony of our Lord, nor of me his prisoner: but be thou partaker of the afflictions of the gospel according to the power of God;
+###### 9
+9 Who hath saved us, and called us with an holy calling, not according to our works, but according to his own purpose and grace, which was given us in Christ Jesus before the world began,
+###### 10
+10 But is now made manifest by the appearing of our Saviour Jesus Christ, who hath abolished death, and hath brought life and immortality to light through the gospel:
+###### 11
+11 Whereunto I am appointed a preacher, and an apostle, and a teacher of the Gentiles.
+###### 12
+12 For the which cause I also suffer these things: nevertheless I am not ashamed: for I know whom I have believed, and am persuaded that he is able to keep that which I have committed unto him against that day.
+###### 13
+13 Hold fast the form of sound words, which thou hast heard of me, in faith and love which is in Christ Jesus.
+###### 14
+14 That good thing which was committed unto thee keep by the Holy Ghost which dwelleth in us.
+###### 15
+15 This thou knowest, that all they which are in Asia be turned away from me; of whom are Phygellus and Hermogenes.
+###### 16
+16 The Lord give mercy unto the house of Onesiphorus; for he oft refreshed me, and was not ashamed of my chain:
+###### 17
+17 But, when he was in Rome, he sought me out very diligently, and found me.
+###### 18
+18 The Lord grant unto him that he may find mercy of the Lord in that day: and in how many things he ministered unto me at Ephesus, thou knowest very well.

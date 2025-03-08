@@ -1,0 +1,60 @@
+---
+publish: true
+tags:
+  - no-graph
+cssclasses:
+  - scriptures
+---
+>[!Properties]+ Chapter Details
+>[Gospel Library](https://churchofjesuschrist.org/study/scriptures/ot/ps/50?lang=eng)    |    [Scripture Citation Index](https://scriptures.byu.edu/#07732::c07732)    |    [Bible Hub](https://biblehub.com/psalms/50.htm)    |    [Inline JST](https://scripturetoolbox.com/html/ic/Psalms/50.html)
+>>[!example]- Chapter Summary
+>> 
+> 
+>
+>#Scripture/OT
+###### 1
+1 The mighty God, even the Lord, hath spoken, and called the earth from the rising of the sun unto the going down thereof.
+###### 2
+2 Out of Zion, the perfection of beauty, God hath shined.
+###### 3
+3 Our God shall come, and shall not keep silence: a fire shall devour before him, and it shall be very tempestuous round about him.
+###### 4
+4 He shall call to the heavens from above, and to the earth, that he may judge his people.
+###### 5
+5 Gather my saints together unto me; those that have made a covenant with me by sacrifice.
+###### 6
+6 And the heavens shall declare his righteousness: for God is judge himself. Selah.
+###### 7
+7 Hear, O my people, and I will speak; O Israel, and I will testify against thee: I am God, even thy God.
+###### 8
+8 I will not reprove thee for thy sacrifices or thy burnt offerings, to have been continually before me.
+###### 9
+9 I will take no bullock out of thy house, nor he goats out of thy folds.
+###### 10
+10 For every beast of the forest is mine, and the cattle upon a thousand hills.
+###### 11
+11 I know all the fowls of the mountains: and the wild beasts of the field are mine.
+###### 12
+12 If I were hungry, I would not tell thee: for the world is mine, and the fulness thereof.
+###### 13
+13 Will I eat the flesh of bulls, or drink the blood of goats?
+###### 14
+14 Offer unto God thanksgiving; and pay thy vows unto the most High:
+###### 15
+15 And call upon me in the day of trouble: I will deliver thee, and thou shalt glorify me.
+###### 16
+16 But unto the wicked God saith, What hast thou to do to declare my statutes, or that thou shouldest take my covenant in thy mouth?
+###### 17
+17 Seeing thou hatest instruction, and castest my words behind thee.
+###### 18
+18 When thou sawest a thief, then thou consentedst with him, and hast been partaker with adulterers.
+###### 19
+19 Thou givest thy mouth to evil, and thy tongue frameth deceit.
+###### 20
+20 Thou sittest and speakest against thy brother; thou slanderest thine own mother's son.
+###### 21
+21 These things hast thou done, and I kept silence; thou thoughtest that I was altogether such an one as thyself: but I will reprove thee, and set them in order before thine eyes.
+###### 22
+22 Now consider this, ye that forget God, lest I tear you in pieces, and there be none to deliver.
+###### 23
+23 Whoso offereth praise glorifieth me: and to him that ordereth his conversation aright will I shew the salvation of God.

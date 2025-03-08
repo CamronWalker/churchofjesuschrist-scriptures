@@ -1,0 +1,66 @@
+---
+publish: true
+tags:
+  - no-graph
+cssclasses:
+  - scriptures
+---
+>[!Properties]+ Chapter Details
+>[Gospel Library](https://churchofjesuschrist.org/study/scriptures/ot/ps/44?lang=eng)    |    [Scripture Citation Index](https://scriptures.byu.edu/#0772c::c0772c)    |    [Bible Hub](https://biblehub.com/psalms/44.htm)    |    [Inline JST](https://scripturetoolbox.com/html/ic/Psalms/44.html)
+>>[!example]- Chapter Summary
+>> 
+> 
+>
+>#Scripture/OT
+###### 1
+1 We have heard with our ears, O God, our fathers have told us, what work thou didst in their days, in the times of old.
+###### 2
+2 How thou didst drive out the heathen with thy hand, and plantedst them; how thou didst afflict the people, and cast them out.
+###### 3
+3 For they got not the land in possession by their own sword, neither did their own arm save them: but thy right hand, and thine arm, and the light of thy countenance, because thou hadst a favour unto them.
+###### 4
+4 Thou art my King, O God: command deliverances for Jacob.
+###### 5
+5 Through thee will we push down our enemies: through thy name will we tread them under that rise up against us.
+###### 6
+6 For I will not trust in my bow, neither shall my sword save me.
+###### 7
+7 But thou hast saved us from our enemies, and hast put them to shame that hated us.
+###### 8
+8 In God we boast all the day long, and praise thy name for ever. Selah.
+###### 9
+9 But thou hast cast off, and put us to shame; and goest not forth with our armies.
+###### 10
+10 Thou makest us to turn back from the enemy: and they which hate us spoil for themselves.
+###### 11
+11 Thou hast given us like sheep appointed for meat; and hast scattered us among the heathen.
+###### 12
+12 Thou sellest thy people for nought, and dost not increase thy wealth by their price.
+###### 13
+13 Thou makest us a reproach to our neighbours, a scorn and a derision to them that are round about us.
+###### 14
+14 Thou makest us a byword among the heathen, a shaking of the head among the people.
+###### 15
+15 My confusion is continually before me, and the shame of my face hath covered me,
+###### 16
+16 For the voice of him that reproacheth and blasphemeth; by reason of the enemy and avenger.
+###### 17
+17 All this is come upon us; yet have we not forgotten thee, neither have we dealt falsely in thy covenant.
+###### 18
+18 Our heart is not turned back, neither have our steps declined from thy way;
+###### 19
+19 Though thou hast sore broken us in the place of dragons, and covered us with the shadow of death.
+###### 20
+20 If we have forgotten the name of our God, or stretched out our hands to a strange god;
+###### 21
+21 Shall not God search this out? for he knoweth the secrets of the heart.
+###### 22
+22 Yea, for thy sake are we killed all the day long; we are counted as sheep for the slaughter.
+###### 23
+23 Awake, why sleepest thou, O Lord? arise, cast us not off for ever.
+###### 24
+24 Wherefore hidest thou thy face, and forgettest our affliction and our oppression?
+###### 25
+25 For our soul is bowed down to the dust: our belly cleaveth unto the earth.
+###### 26
+26 Arise for our help, and redeem us for thy mercies' sake.
