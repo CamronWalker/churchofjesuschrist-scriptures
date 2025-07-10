@@ -115,18 +115,38 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
     ie_url = chapter_links.get("ie_url", "")  # Retrieve Isaiah Explained URL
     blb_url = chapter_links.get("blb_url", "")
 
+    # Determine book_for_embed and section_for_embed for the embed link
+    if book == "Doctrine and Covenants":
+        book_for_embed = "Doctrine and Covenants"
+        section_for_embed = f"Section {chapter}"
+    elif book.startswith("Official Declaration--"):
+        num = book.split("--")[1]
+        book_for_embed = f"Official Declaration {num}"
+        section_for_embed = f"Official Declaration {num}"
+    else:
+        book_for_embed = book.replace("--", "—")
+        section_for_embed = f"{book_for_embed} {chapter}"
+
     with open(file_path, "w", encoding="utf-8") as f:
         # Write front matter
         f.write("---\n")
         f.write("publish: true\n")
         f.write("tags:\n")
         f.write("  - no-graph\n")
+        
+        # Write scripture heading
+        if tag:
+            f.write(f"  - {tag}\n")
         f.write("cssclasses:\n")
         f.write("  - scriptures\n")
+        f.write("summary:\n")
+        f.write("summary_child:\n")
         f.write("---\n")
-
+##############
+#############TODO change chapter details to use frontmatter rather than chapter summary
+##############
         # Write chapter details with hyperlinks
-        f.write(">[!Properties]+ Chapter Details\n")
+        f.write(">[!Properties]- Chapter Details\n")
         if category in ["Old Testament", "New Testament"]:
             # Start with the base links for all Bible chapters
             links = f">[Gospel Library]({url})    |    [Citation Index]({sci_url})    |    [Blue Letter Bible]({blb_url})"
@@ -138,15 +158,14 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
                 links += f"    |    [Isaiah Explained]({ie_url})"
             f.write(links + "\n")
         else:
-            f.write(f">[Gospel Library]({url})    |    [Citation Index]({sci_url})\n")
-        f.write(">>[!example]- Chapter Summary\n")
-        f.write(">> ^chapter-summary\n")
-        f.write("> \n")
-        f.write(">\n")
+            f.write(f">[Gospel Library]({url})    |    [Citation Index]({sci_url})\n\n")
 
-        # Write scripture heading
-        if tag:
-            f.write(f">#{tag}\n")
+##############
+#############TODO ai summary (and child summary) for chapter
+##############
+        # Write Chapter Summary with embed link
+        # f.write(f">![[{book_for_embed}#{section_for_embed}]]\n\n")
+
 
         # Write verses with verse number prepended to the text
         for verse_num in sorted(verses.keys()):

@@ -133,8 +133,14 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
         f.write("publish: true\n")
         f.write("tags:\n")
         f.write("  - no-graph\n")
+        
+        # Write scripture heading
+        if tag:
+            f.write("  - {tag}\n")
         f.write("cssclasses:\n")
         f.write("  - scriptures\n")
+        f.write("summary:\n")
+        f.write("summary_child:\n")
         f.write("---\n")
 
         # Write chapter details with hyperlinks
@@ -155,9 +161,6 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
         # Write Chapter Summary with embed link
         f.write(f">![[{book_for_embed}#{section_for_embed}]]\n")
 
-        # Write scripture heading
-        if tag:
-            f.write(f">#{tag}\n")
 
         # Write verses with verse number prepended to the text
         for verse_num in sorted(verses.keys()):
