@@ -239,7 +239,7 @@ for book in standard_works:
                 
                 # Blue Letter Bible URL
                 short_code = blb_short_codes[book["name"]]
-                blb_chapter_url = f"https://www.blueletterbible.org/kjv/{short_code}/{chapter}/"
+                blb_chapter_url = f"https://www.blueletterbible.org/kjv/{short_code}/{chapter}/1/ss1/"
                 chapter_dict["blb_url"] = blb_chapter_url
             
             # Add Isaiah Explained URL specifically for the book of Isaiah
