@@ -139,14 +139,10 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
             f.write(f"  - {tag}\n")
         f.write("cssclasses:\n")
         f.write("  - scriptures\n")
-        f.write("summary:\n")
-        f.write("summary_child:\n")
         f.write("---\n")
-##############
-#############TODO change chapter details to use frontmatter rather than chapter summary
-##############
+
         # Write chapter details with hyperlinks
-        f.write(">[!Properties]- Chapter Details\n")
+        f.write(">[!Properties]+ Chapter Details\n")
         if category in ["Old Testament", "New Testament"]:
             # Start with the base links for all Bible chapters
             links = f">[Gospel Library]({url})    |    [Citation Index]({sci_url})    |    [Blue Letter Bible]({blb_url})"
@@ -158,13 +154,16 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
                 links += f"    |    [Isaiah Explained]({ie_url})"
             f.write(links + "\n")
         else:
-            f.write(f">[Gospel Library]({url})    |    [Citation Index]({sci_url})\n\n")
+            f.write(f">[Gospel Library]({url})    |    [Citation Index]({sci_url})\n")
 
-##############
-#############TODO ai summary (and child summary) for chapter
-##############
         # Write Chapter Summary with embed link
-        # f.write(f">![[{book_for_embed}#{section_for_embed}]]\n\n")
+        f.write(f">>[!AI]- AI Context%CONTEXT_SUMMARY%\n")
+        f.write(f">>%CONTEXT_SUMMARY%\n>\n")
+        f.write(f">>[!AI]- AI Child Summary\n")
+        f.write(f">>%CHILD_SUMMARY%\n>\n")
+        f.write(f">>[!AI]- AI Summary\n")
+        f.write(f">>%NORMAL_SUMMARY%\n")
+        f.write(f">\n>%TAGS%\n")
 
 
         # Write verses with verse number prepended to the text
