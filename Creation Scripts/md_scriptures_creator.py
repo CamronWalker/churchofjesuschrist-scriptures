@@ -139,6 +139,14 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
             f.write(f"  - {tag}\n")
         f.write("cssclasses:\n")
         f.write("  - scriptures\n")
+        f.write(f"gospel_library_url: {url}\n")
+        f.write(f"citation_index_url: {sci_url}\n")
+        if category in ["Old Testament", "New Testament"]:
+            f.write(f"blue_letter_bible_url: {blb_url}\n")
+            if book_key != "Song of Solomon":
+                f.write(f"inline_jst_url: {st_url}\n")
+            if book_key == "Isaiah":
+                f.write(f"isaiah_explained_url: {ie_url}\n")
         f.write("---\n")
 
         # Write chapter details with hyperlinks

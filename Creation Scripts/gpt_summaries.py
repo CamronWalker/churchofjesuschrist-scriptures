@@ -1,7 +1,7 @@
 import os
 import re
 import json
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 import time
 import yaml
 from dotenv import load_dotenv
@@ -34,60 +34,68 @@ def generate_ai_summaries(book, chapter, verses):
         "Tags: [your tags here]"
     )
     
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4.1",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=500
-        )
-        output = response.choices[0].message.content.strip()
-        
-        # Better parsing to handle multi-line summaries
-        lines = output.split("\n")
-        current = None
-        child_summary_lines = []
-        normal_summary_lines = []
-        context_summary_lines = []
-        tags_lines = []
-        
-        for line in lines:
-            if line.startswith("Child Summary:"):
-                current = child_summary_lines
-                content = line.split(":", 1)[1].strip() if ":" in line else ""
-                if content:
-                    current.append(content)
-            elif line.startswith("Normal Summary:"):
-                current = normal_summary_lines
-                content = line.split(":", 1)[1].strip() if ":" in line else ""
-                if content:
-                    current.append(content)
-            elif line.startswith("Context Summary:"):
-                current = context_summary_lines
-                content = line.split(":", 1)[1].strip() if ":" in line else ""
-                if content:
-                    current.append(content)
-            elif line.startswith("Tags:"):
-                current = tags_lines
-                content = line.split(":", 1)[1].strip() if ":" in line else ""
-                if content:
-                    current.append(content)
-            else:
-                if current is not None and line.strip():
-                    current.append(line.strip())
-        
-        child_summary = " ".join(child_summary_lines)
-        normal_summary = " ".join(normal_summary_lines)
-        context_summary = " ".join(context_summary_lines)
-        tags_str = " ".join(tags_lines)
-        
-        # To mitigate rate limits, add a delay between calls
-        time.sleep(2)  # 2-second delay; adjust based on your rate limit tier
-        
-        return child_summary, normal_summary, context_summary, tags_str
-    except Exception as e:
-        print(f"Error generating summary for {book} {chapter}: {e}")
-        return "", "", "", ""
+    max_retries = 5
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4.1",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=500
+            )
+            output = response.choices[0].message.content.strip()
+            
+            # Better parsing to handle multi-line summaries
+            lines = output.split("\n")
+            current = None
+            child_summary_lines = []
+            normal_summary_lines = []
+            context_summary_lines = []
+            tags_lines = []
+            
+            for line in lines:
+                if line.startswith("Child Summary:"):
+                    current = child_summary_lines
+                    content = line.split(":", 1)[1].strip() if ":" in line else ""
+                    if content:
+                        current.append(content)
+                elif line.startswith("Normal Summary:"):
+                    current = normal_summary_lines
+                    content = line.split(":", 1)[1].strip() if ":" in line else ""
+                    if content:
+                        current.append(content)
+                elif line.startswith("Context Summary:"):
+                    current = context_summary_lines
+                    content = line.split(":", 1)[1].strip() if ":" in line else ""
+                    if content:
+                        current.append(content)
+                elif line.startswith("Tags:"):
+                    current = tags_lines
+                    content = line.split(":", 1)[1].strip() if ":" in line else ""
+                    if content:
+                        current.append(content)
+                else:
+                    if current is not None and line.strip():
+                        current.append(line.strip())
+            
+            child_summary = " ".join(child_summary_lines)
+            normal_summary = " ".join(normal_summary_lines)
+            context_summary = " ".join(context_summary_lines)
+            tags_str = " ".join(tags_lines)
+            
+            # To mitigate rate limits, add a delay between calls
+            time.sleep(0)  # 2-second delay; adjust based on your rate limit tier
+            
+            return child_summary, normal_summary, context_summary, tags_str
+        except RateLimitError as e:
+            wait_time = 2 ** attempt
+            print(f"Rate limit hit for {book} {chapter}: {e}. Retrying in {wait_time} seconds... (Attempt {attempt + 1}/{max_retries})")
+            time.sleep(wait_time)
+        except Exception as e:
+            print(f"Error generating summary for {book} {chapter}: {e}")
+            return "", "", "", ""
+    print(f"Max retries exceeded for {book} {chapter}")
+    return "", "", "", ""
 
 # Function to extract book and chapter from file path
 def get_book_chapter(file_path):
