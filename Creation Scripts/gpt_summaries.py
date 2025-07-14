@@ -84,7 +84,7 @@ def generate_ai_summaries(book, chapter, verses):
             tags_str = " ".join(tags_lines)
             
             # To mitigate rate limits, add a delay between calls
-            time.sleep(0)  # 2-second delay; adjust based on your rate limit tier
+            time.sleep(0)  # delay; adjust based on your rate limit tier
             
             return child_summary, normal_summary, context_summary, tags_str
         except RateLimitError as e:
