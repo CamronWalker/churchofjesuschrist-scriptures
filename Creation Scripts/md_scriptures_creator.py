@@ -186,7 +186,7 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
             f.write(links + "\n")
 
         # Write Chapter Summary with embed link
-        f.write(f">>[!AI]- AI Context%CONTEXT_SUMMARY%\n")
+        f.write(f">>[!AI]- AI Context\n")
         f.write(f">>%CONTEXT_SUMMARY%\n>\n")
         f.write(f">>[!AI]- AI Child Summary\n")
         f.write(f">>%CHILD_SUMMARY%\n>\n")
