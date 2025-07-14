@@ -147,6 +147,16 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
                 f.write(f"inline_jst_url: {st_url}\n")
             if book_key == "Isaiah":
                 f.write(f"isaiah_explained_url: {ie_url}\n")
+        if category == "Doctrine and Covenants":
+            if 'hr_url' in chapter_links:
+                hr_url = chapter_links['hr_url']
+                if hr_url:
+                    f.write(f"historical_resources_url: {hr_url}\n")
+            jsp_keys = sorted([k for k in chapter_links if k.startswith('jsp_url_')])
+            for i, k in enumerate(jsp_keys, 1):
+                jsp_url = chapter_links[k]
+                if jsp_url:
+                    f.write(f"joseph_smith_papers_url_{i}: {jsp_url}\n")
         f.write("---\n")
 
         # Write chapter details with hyperlinks
@@ -162,7 +172,18 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
                 links += f"    |    [Isaiah Explained]({ie_url})"
             f.write(links + "\n")
         else:
-            f.write(f">[Gospel Library]({url})    |    [Citation Index]({sci_url})\n")
+            links = f">[Gospel Library]({url})    |    [Citation Index]({sci_url})"
+            if 'hr_url' in chapter_links:
+                hr_url = chapter_links['hr_url']
+                if hr_url:
+                    links += f"    |    [Historical Resources]({hr_url})"
+            # Collect and add Joseph Smith Papers links
+            jsp_keys = sorted([k for k in chapter_links if k.startswith('jsp_url_')])
+            for i, k in enumerate(jsp_keys, 1):
+                jsp_url = chapter_links[k]
+                if jsp_url:
+                    links += f"    |    [JS Papers]({jsp_url})"
+            f.write(links + "\n")
 
         # Write Chapter Summary with embed link
         f.write(f">>[!AI]- AI Context%CONTEXT_SUMMARY%\n")

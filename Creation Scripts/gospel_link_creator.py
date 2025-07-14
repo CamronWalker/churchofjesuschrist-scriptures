@@ -238,6 +238,188 @@ for entry in hr_list:
     for sec in entry["sections"]:
         section_to_nn[sec] = entry["nn"]
 
+# Joseph Smith Papers mapping for D&C sections
+jsp_mapping = {
+    1: ["/paperSummary/revelation-1-november-1831-b-dc-1"],
+    2: ["/paperSummary/history-1838-1856-volume-a-1-23-december-1805-30-august-1834?p=5"],
+    3: ["/paperSummary/revelation-july-1828-dc-3"],
+    4: ["/paperSummary/revelation-february-1829-dc-4"],
+    5: ["/paperSummary/revelation-march-1829-dc-5"],
+    6: ["/paperSummary/revelation-april-1829-a-dc-6"],
+    7: ["/paperSummary/account-of-john-april-1829-c-dc-7"],
+    8: ["/paperSummary/revelation-april-1829-b-dc-8"],
+    9: ["/paperSummary/revelation-april-1829-d-dc-9"],
+    10: ["/paperSummary/revelation-spring-1829-dc-10"],
+    11: ["/paperSummary/revelation-may-1829-a-dc-11"],
+    12: ["/paperSummary/revelation-may-1829-b-dc-12"],
+    13: ["/paperSummary/history-1838-1856-volume-a-1-23-december-1805-30-august-1834?p=23"],
+    14: ["/paperSummary/revelation-june-1829-a-dc-14"],
+    15: ["/paperSummary/revelation-june-1829-c-dc-15"],
+    16: ["/paperSummary/revelation-june-1829-d-dc-16"],
+    17: ["/paperSummary/revelation-june-1829-e-dc-17"],
+    18: ["/paperSummary/revelation-june-1829-b-dc-18"],
+    19: ["/paperSummary/revelation-circa-summer-1829-dc-19"],
+    20: ["/paperSummary/articles-and-covenants-circa-april-1830-dc-20"],
+    21: ["/paperSummary/revelation-6-april-1830-dc-21"],
+    22: ["/paperSummary/revelation-16-april-1830-dc-22"],
+    23: [
+        "/paperSummary/revelation-april-1830-a-dc-231-2",
+        "/paperSummary/revelation-april-1830-d-dc-235",
+        "/paperSummary/revelation-april-1830-c-dc-234",
+        "/paperSummary/revelation-april-1830-e-dc-236-7",
+        "/paperSummary/revelation-april-1830-b-dc-233"
+    ],
+    24: ["/paperSummary/revelation-july-1830-a-dc-24"],
+    25: ["/paperSummary/revelation-july-1830-c-dc-25"],
+    26: ["/paperSummary/revelation-july-1830-b-dc-26"],
+    27: [
+        "/paperSummary/revelation-circa-august-1835-dc-27",
+        "/paperSummary/revelation-circa-august-1830-dc-27"
+    ],
+    28: ["/paperSummary/revelation-september-1830-b-dc-28"],
+    29: ["/paperSummary/revelation-september-1830-a-dc-29"],
+    30: [
+        "/paperSummary/revelation-september-1830-c-dc-301-4",
+        "/paperSummary/revelation-september-1830-e-dc-309-11",
+        "/paperSummary/revelation-september-1830-d-dc-305-8"
+    ],
+    31: ["/paperSummary/revelation-september-1830-f-dc-31"],
+    32: ["/paperSummary/revelation-october-1830-a-dc-32"],
+    33: ["/paperSummary/revelation-october-1830-b-dc-33"],
+    34: ["/paperSummary/revelation-4-november-1830-dc-34"],
+    35: ["/paperSummary/revelation-7-december-1830-dc-35"],
+    36: ["/paperSummary/revelation-9-december-1830-dc-36"],
+    37: ["/paperSummary/revelation-30-december-1830-dc-37"],
+    38: ["/paperSummary/revelation-2-january-1831-dc-38"],
+    39: ["/paperSummary/revelation-5-january-1831-dc-39"],
+    40: ["/paperSummary/revelation-6-january-1831-dc-40"],
+    41: ["/paperSummary/revelation-4-february-1831-dc-41"],
+    42: [
+        "/paperSummary/revelation-9-february-1831-dc-421-72",
+        "/paperSummary/revelation-23-february-1831-dc-4274-93"
+    ],
+    43: ["/paperSummary/revelation-february-1831-a-dc-43"],
+    44: ["/paperSummary/revelation-february-1831-b-dc-44"],
+    45: ["/paperSummary/revelation-circa-7-march-1831-dc-45"],
+    46: ["/paperSummary/revelation-circa-8-march-1831-a-dc-46"],
+    47: ["/paperSummary/revelation-circa-8-march-1831-b-dc-47"],
+    48: ["/paperSummary/revelation-10-march-1831-dc-48"],
+    49: ["/paperSummary/revelation-7-may-1831-dc-49"],
+    50: ["/paperSummary/revelation-9-may-1831-dc-50"],
+    51: ["/paperSummary/revelation-20-may-1831-dc-51"],
+    52: ["/paperSummary/revelation-6-june-1831-dc-52"],
+    53: ["/paperSummary/revelation-8-june-1831-dc-53"],
+    54: ["/paperSummary/revelation-10-june-1831-dc-54"],
+    55: ["/paperSummary/revelation-14-june-1831-dc-55"],
+    56: ["/paperSummary/revelation-15-june-1831-dc-56"],
+    57: ["/paperSummary/revelation-20-july-1831-dc-57"],
+    58: ["/paperSummary/revelation-1-august-1831-dc-58"],
+    59: ["/paperSummary/revelation-7-august-1831-dc-59"],
+    60: ["/paperSummary/revelation-8-august-1831-dc-60"],
+    61: ["/paperSummary/revelation-12-august-1831-dc-61"],
+    62: ["/paperSummary/revelation-13-august-1831-dc-62"],
+    63: ["/paperSummary/revelation-30-august-1831-dc-63"],
+    64: ["/paperSummary/revelation-11-september-1831-dc-64"],
+    65: ["/paperSummary/revelation-30-october-1831-dc-65"],
+    66: ["/paperSummary/revelation-29-october-1831-dc-66"],
+    67: ["/paperSummary/revelation-circa-2-november-1831-dc-67"],
+    68: [
+        "/paperSummary/revelation-1-november-1831-a-dc-68",
+        "/paper-summary/revelation-circa-june-1835-dc-68/1"
+    ],
+    69: ["/paperSummary/revelation-11-november-1831-a-dc-69"],
+    70: ["/paperSummary/revelation-12-november-1831-dc-70"],
+    71: ["/paperSummary/revelation-1-december-1831-dc-71"],
+    72: [
+        "/paperSummary/revelation-4-december-1831-a-dc-721-8",
+        "/paperSummary/revelation-4-december-1831-c-dc-7224-26",
+        "/paperSummary/revelation-4-december-1831-b-dc-729-23"
+    ],
+    73: ["/paperSummary/revelation-10-january-1832-dc-73"],
+    74: ["/paperSummary/explanation-of-scripture-1830-dc-74"],
+    75: [
+        "/paperSummary/revelation-25-january-1832-b-dc-7523-36",
+        "/paperSummary/revelation-25-january-1832-a-dc-751-22"
+    ],
+    76: ["/paperSummary/vision-16-february-1832-dc-76"],
+    77: ["/paperSummary/answers-to-questions-between-circa-4-and-circa-20-march-1832-dc-77"],
+    78: ["/paperSummary/revelation-1-march-1832-dc-78"],
+    79: ["/paperSummary/revelation-12-march-1832-dc-79"],
+    80: ["/paperSummary/revelation-7-march-1832-dc-80"],
+    81: ["/paperSummary/revelation-15-march-1832-dc-81"],
+    82: ["/paperSummary/revelation-26-april-1832-dc-82"],
+    83: ["/paperSummary/revelation-30-april-1832-dc-83"],
+    84: ["/paperSummary/revelation-22-23-september-1832-dc-84"],
+    85: ["/paperSummary/letter-to-william-w-phelps-27-november-1832"],
+    86: ["/paperSummary/revelation-6-december-1832-dc-86"],
+    87: ["/paperSummary/revelation-25-december-1832-dc-87"],
+    88: [
+        "/paperSummary/revelation-27-28-december-1832-dc-881-126",
+        "/paperSummary/revelation-3-january-1833-dc-88127-137"
+    ],
+    89: ["/paperSummary/revelation-27-february-1833-dc-89"],
+    90: ["/paperSummary/revelation-8-march-1833-dc-90"],
+    91: ["/paperSummary/revelation-9-march-1833-dc-91"],
+    92: ["/paperSummary/revelation-15-march-1833-dc-92"],
+    93: ["/paperSummary/revelation-6-may-1833-dc-93"],
+    94: ["/paperSummary/revelation-2-august-1833-b-dc-94"],
+    95: ["/paperSummary/revelation-1-june-1833-dc-95"],
+    96: ["/paperSummary/revelation-4-june-1833-dc-96"],
+    97: ["/paperSummary/revelation-2-august-1833-a-dc-97"],
+    98: ["/paperSummary/revelation-6-august-1833-dc-98"],
+    99: ["/paperSummary/revelation-29-august-1832-dc-99"],
+    100: ["/paperSummary/revelation-12-october-1833-dc-100"],
+    101: ["/paperSummary/revelation-16-17-december-1833-dc-101"],
+    102: ["/paperSummary/revised-minutes-18-19-february-1834-dc-102"],
+    103: ["/paperSummary/revelation-24-february-1834-dc-103"],
+    104: ["/paperSummary/revelation-23-april-1834-dc-104"],
+    105: ["/paperSummary/revelation-22-june-1834-dc-105"],
+    106: ["/paperSummary/revelation-25-november-1834-dc-106"],
+    107: [
+        "/paper-summary/instruction-on-priesthood-between-circa-1-march-and-circa-4-may-1835-dc-107",
+        "/paperSummary/revelation-11-november-1831-b-dc-107-partial"
+    ],
+    108: ["/paperSummary/revelation-26-december-1835-dc-108"],
+    109: ["/paperSummary/prayer-of-dedication-27-march-1836-dc-109"],
+    110: ["/paperSummary/visions-3-april-1836-dc-110"],
+    111: ["/paperSummary/revelation-6-august-1836-dc-111"],
+    112: ["/paperSummary/revelation-23-july-1837-dc-112"],
+    113: [
+        "/paperSummary/revelation-march-1838-dc-113",
+        "paper-summary/questions-and-answers-between-circa-16-and-circa-29-march-1838-b-dc-1137-10/1"
+    ],
+    114: ["/paperSummary/revelation-11-april-1838-dc-114"],
+    115: ["/paperSummary/revelation-26-april-1838-dc-115"],
+    116: ["/paperSummary/journal-march-september-1838?p=30"],
+    117: ["/paper-summary/revelation-8-july-1838-e-dc-117"],
+    118: ["/paperSummary/revelation-8-july-1838-a-dc-118"],
+    119: ["/paperSummary/revelation-8-july-1838-c-dc-119"],
+    120: ["/paperSummary/revelation-8-july-1838-d-dc-120"],
+    121: ["/paper-summary/letter-to-the-church-and-edward-partridge-20-march-1839/3"],
+    122: ["/paper-summary/letter-to-edward-partridge-and-the-church-circa-22-march-1839/3"],
+    123: ["/paper-summary/letter-to-edward-partridge-and-the-church-circa-22-march-1839/5"],
+    124: ["/paperSummary/revelation-19-january-1841-dc-124"],
+    125: ["/paperSummary/revelation-circa-march-1841-dc-125"],
+    126: ["/paperSummary/revelation-9july-1841-dc-126"],
+    127: ["/paperSummary/journal-december-1841-december-1842?p=66"],
+    128: ["/paper-summary/letter-to-the-church-7-september-1842-dc-128"],
+    129: ["/paper-summary/instruction-9-february-1843-dc-129-as-reported-by-william-clayton"],
+    130: [
+        "/paper-summary/instruction-2-april-1843-as-reported-by-william-clayton-dc-130",
+        "/paper-summary/instruction-2-april-1843-as-reported-by-willard-richards-dc-130"
+    ],
+    131: [
+        "/paper-summary/discourse-17-may-1843-a",
+        "/paper-summary/instruction-16-may-1843",
+        "/paper-summary/discourse-17-may-1843-b"
+    ],
+    132: ["/paper-summary/revelation-12-july-1843-dc-132"],
+    133: ["/paperSummary/revelation-3-november-1831-dc-133"],
+    134: ["/paper-summary/declaration-on-government-and-law-circa-august-1835-dc-134"],
+    135: ["/paperSummary/doctrine-and-covenants-1844?p=446"],
+    137: ["/paper-summary/visions-21-january-1836-dc-137"]
+}
+
 # Initialize the JSON data structure
 json_data = {}
 
@@ -309,6 +491,21 @@ for book in standard_works:
                     nn = section_to_nn[chapter]
                     hr_url = f"https://www.churchofjesuschrist.org/study/history/doctrine-and-covenants-historical-resources-2025/{nn}?lang=eng"
                     chapter_dict["hr_url"] = hr_url
+
+            # Add Joseph Smith Papers URLs for D&C sections
+            if volume == "dc-testament" and book["name"] == "Sections":
+                if chapter in jsp_mapping:
+                    urls = jsp_mapping[chapter]
+                    base_jsp = "https://www.josephsmithpapers.org"
+                    for i, rel_url in enumerate(urls, 1):
+                        if rel_url.startswith('/'):
+                            full_url = base_jsp + rel_url
+                        else:
+                            full_url = base_jsp + '/' + rel_url
+                        if len(urls) == 1:
+                            chapter_dict["jsp_url_1"] = full_url
+                        else:
+                            chapter_dict[f"jsp_url_{i}"] = full_url
             
             chapter_list.append(chapter_dict)
     
@@ -341,4 +538,4 @@ with open('lds_scriptures_urls.json', 'w', encoding='utf-8') as f:
     json.dump(json_data, f, indent=4)
 
 # Confirmation message
-print("JSON file 'lds_scriptures_urls.json' has been created successfully with Blue Letter Bible links for OT and NT chapters, FAIR links for BoM books, and Historical Resources links for D&C sections.")
+print("JSON file 'lds_scriptures_urls.json' has been created successfully with Blue Letter Bible links for OT and NT chapters, FAIR links for BoM books, Historical Resources links for D&C sections, and Joseph Smith Papers links for D&C sections.")
