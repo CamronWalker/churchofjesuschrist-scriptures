@@ -182,6 +182,62 @@ blb_short_codes = {
     "Revelation": "rev"
 }
 
+# Historical Resources mapping for D&C sections
+hr_list = [
+    {"nn": "01", "sections": [1]},
+    {"nn": "03", "sections": [2]},
+    {"nn": "04", "sections": [3,4,5]},
+    {"nn": "05", "sections": [6,7,8,9]},
+    {"nn": "06", "sections": [10,11]},
+    {"nn": "07", "sections": [12,13,14,15,16,17]},
+    {"nn": "08", "sections": [18]},
+    {"nn": "09", "sections": [19]},
+    {"nn": "10", "sections": [20,21,22]},
+    {"nn": "11", "sections": [23,24,25,26]},
+    {"nn": "12", "sections": [27,28]},
+    {"nn": "13", "sections": [29]},
+    {"nn": "14", "sections": [30,31,32,33,34,35,36]},
+    {"nn": "17", "sections": [37,38,39,40]},
+    {"nn": "18", "sections": [41,42,43,44]},
+    {"nn": "19", "sections": [45]},
+    {"nn": "20", "sections": [46,47,48]},
+    {"nn": "21", "sections": [49,50]},
+    {"nn": "22", "sections": [51,52,53,54,55,56,57]},
+    {"nn": "23", "sections": [58,59]},
+    {"nn": "24", "sections": [60,61,62,63]},
+    {"nn": "25", "sections": [64,65,66]},
+    {"nn": "26", "sections": [67,68,69,70]},
+    {"nn": "27", "sections": [71,72,73,74,75]},
+    {"nn": "28", "sections": [76]},
+    {"nn": "29", "sections": [77,78,79,80]},
+    {"nn": "30", "sections": [81,82,83]},
+    {"nn": "31", "sections": [84]},
+    {"nn": "32", "sections": [85,86,87]},
+    {"nn": "33", "sections": [88]},
+    {"nn": "34", "sections": [89,90,91,92]},
+    {"nn": "35", "sections": [93]},
+    {"nn": "36", "sections": [94,95,96,97]},
+    {"nn": "37", "sections": [98,99,100,101]},
+    {"nn": "38", "sections": [102,103,104,105]},
+    {"nn": "39", "sections": [106,107,108]},
+    {"nn": "40", "sections": [109,110]},
+    {"nn": "41", "sections": [111,112,113,114]},
+    {"nn": "42", "sections": [115,116,117,118,119,120]},
+    {"nn": "43", "sections": [121,122,123]},
+    {"nn": "44", "sections": [124]},
+    {"nn": "45", "sections": [125,126,127,128]},
+    {"nn": "46", "sections": [129,130,131,132]},
+    {"nn": "47", "sections": [133,134]},
+    {"nn": "48", "sections": [135,136]},
+    {"nn": "49", "sections": [137,138]},
+]
+
+# Create section to nn mapping
+section_to_nn = {}
+for entry in hr_list:
+    for sec in entry["sections"]:
+        section_to_nn[sec] = entry["nn"]
+
 # Initialize the JSON data structure
 json_data = {}
 
@@ -247,6 +303,13 @@ for book in standard_works:
                 ie_chapter_url = f"https://www.isaiahexplained.com/chapter/{chapter}"
                 chapter_dict["ie_url"] = ie_chapter_url
             
+            # Add Historical Resources URL for D&C sections
+            if volume == "dc-testament" and book["name"] == "Sections":
+                if chapter in section_to_nn:
+                    nn = section_to_nn[chapter]
+                    hr_url = f"https://www.churchofjesuschrist.org/study/history/doctrine-and-covenants-historical-resources-2025/{nn}?lang=eng"
+                    chapter_dict["hr_url"] = hr_url
+            
             chapter_list.append(chapter_dict)
     
     # Create book dictionary with all details
@@ -254,8 +317,21 @@ for book in standard_works:
         "name": book["name"],
         "url": gl_book_url,  # Gospel Library URL for the book
         "sci_url": sci_book_url,  # Scripture Citation Index URL for the book
-        "chapters": chapter_list  # List of chapters with their URLs
     }
+    
+    # Add FAIR URL for Book of Mormon books (above chapters)
+    if volume == "bofm":
+        fair_name = book["name"].replace(" ", "_")
+        fair_url = f"https://www.fairlatterdaysaints.org/answers/FAIR_Study_Aids/Book_of_Mormon_Resources_by_chapter_and_verse/{fair_name}"
+        book_data["fair_url"] = fair_url
+    
+    # Add chapters after FAIR URL
+    book_data["chapters"] = chapter_list
+    
+    # Special handling for Official Declarations (no chapters, but add HR URL at book level)
+    if volume == "dc-testament" and book["name"] in ["Official Declaration 1", "Official Declaration 2"]:
+        hr_url = "https://www.churchofjesuschrist.org/study/history/doctrine-and-covenants-historical-resources-2025/50?lang=eng"
+        book_data["hr_url"] = hr_url
     
     # Add book data to the appropriate volume
     json_data[volume_name].append(book_data)
@@ -265,4 +341,4 @@ with open('lds_scriptures_urls.json', 'w', encoding='utf-8') as f:
     json.dump(json_data, f, indent=4)
 
 # Confirmation message
-print("JSON file 'lds_scriptures_urls.json' has been created successfully with Blue Letter Bible links for OT and NT chapters.")
+print("JSON file 'lds_scriptures_urls.json' has been created successfully with Blue Letter Bible links for OT and NT chapters, FAIR links for BoM books, and Historical Resources links for D&C sections.")
