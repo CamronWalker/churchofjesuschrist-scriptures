@@ -153,13 +153,52 @@ def integrate_verses(urls_data, verses_data):
             if volume_name == "Doctrine and Covenants" and book_name == "Sections":
                 book_verses = verses_data.get("Doctrine and Covenants", [])
             else:
-                if book_name not in verses_data or "chapters" not in book:
+                if book_name not in verses_data:
                     continue
                 book_verses = verses_data[book_name]
+            # Move book urls to book_resources
+            book_resources = []
+            if "url" in book:
+                book_resources.append({"name": "Gospel Library", "url": book.pop("url")})
+            if "sci_url" in book:
+                book_resources.append({"name": "Scripture Citation Index", "url": book.pop("sci_url")})
+            if "fair_url" in book:
+                book_resources.append({"name": "FAIR Latter-day Saints", "url": book.pop("fair_url")})
+            if "hr_url" in book:
+                book_resources.append({"name": "Historical Resources", "url": book.pop("hr_url")})
+            for i in range(1, 6):
+                key = f"jsp_url_{i}"
+                if key in book:
+                    book_resources.append({"name": f"Joseph Smith Papers", "url": book.pop(key)})
+            if book_resources:
+                book["book_resources"] = book_resources
+            # For chapters
             chapters = book.get("chapters", [])
             for i, chapter in enumerate(chapters):
                 if i < len(book_verses):
                     chapter["verses"] = book_verses[i]
+                # Move chapter urls to chapter_resources
+                chapter_resources = []
+                if "url" in chapter:
+                    chapter_resources.append({"name": "Gospel Library", "url": chapter.pop("url")})
+                if "sci_url" in chapter:
+                    chapter_resources.append({"name": "Citation Index", "url": chapter.pop("sci_url")})
+                if "bh_url" in chapter:
+                    chapter_resources.append({"name": "Bible Hub", "url": chapter.pop("bh_url")})
+                if "st_url" in chapter:
+                    chapter_resources.append({"name": "Inline JST", "url": chapter.pop("st_url")})
+                if "blb_url" in chapter:
+                    chapter_resources.append({"name": "Strong's", "url": chapter.pop("blb_url")})
+                if "ie_url" in chapter:
+                    chapter_resources.append({"name": "Isaiah Explained", "url": chapter.pop("ie_url")})
+                if "hr_url" in chapter:
+                    chapter_resources.append({"name": "Historical Resources", "url": chapter.pop("hr_url")})
+                for j in range(1, 6):
+                    key = f"jsp_url_{j}"
+                    if key in chapter:
+                        chapter_resources.append({"name": f"JS Papers", "url": chapter.pop(key)})
+                if chapter_resources:
+                    chapter["chapter_resources"] = chapter_resources
     return urls_data
 
 # Function to split and save into separate files in subfolder

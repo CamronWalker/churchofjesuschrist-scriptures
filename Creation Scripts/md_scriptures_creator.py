@@ -1,5 +1,4 @@
 import os
-import re
 import json
 
 # Define the lists of books for each category in their standard order
@@ -24,108 +23,41 @@ bom_books = [
 pogp_books = [
     "Moses", "Abraham", "Joseph Smith--Matthew", "Joseph Smith--History", "Articles of Faith"
 ]
+dc_books = [
+    "Doctrine and Covenants", "Official Declaration 1", "Official Declaration 2"
+]
 
-# Load the JSON file with hyperlinks
-with open("lds_scriptures_urls.json", "r", encoding="utf-8") as f:
-    json_data = json.load(f)
+json_files = {
+    "Old Testament": "old_testament.json",
+    "New Testament": "new_testament.json",
+    "Book of Mormon": "book_of_mormon.json",
+    "Pearl of Great Price": "pearl_of_great_price.json",
+    "Doctrine and Covenants": "doctrine_and_covenants.json"
+}
 
-# Create a dictionary to map book names (as in JSON) to their chapters' URLs
-links_dict = {}
-for category, books in json_data.items():
-    for book in books:
-        book_name = book['name']
-        links_dict[book_name] = {}
-        for chapter in book['chapters']:
-            chapter_num = str(chapter['number'])
-            # Include all URLs for the chapter, excluding 'number'
-            links_dict[book_name][chapter_num] = {k: v for k, v in chapter.items() if k != 'number'}
+book_orders = {
+    "Old Testament": ot_books,
+    "New Testament": nt_books,
+    "Book of Mormon": bom_books,
+    "Pearl of Great Price": pogp_books,
+    "Doctrine and Covenants": dc_books
+}
 
-# Initialize a dictionary to hold the verses
-books = {}
+tag_map = {
+    "Old Testament": "Scripture/OT",
+    "New Testament": "Scripture/NT",
+    "Book of Mormon": "Scripture/BoM",
+    "Doctrine and Covenants": "Scripture/DandC",
+    "Pearl of Great Price": "Scripture/PoGP"
+}
 
-# Read and parse the input file
-with open("lds-scriptures.txt", "r", encoding="utf-8") as f:
-    for line in f:
-        match = re.match(r"^(.*?)\s(\d+:\d+)\s*(.*)$", line.strip())
-        if match:
-            book = match.group(1).strip()
-            chapter_verse = match.group(2)
-            text = match.group(3).strip()
-            chapter, verse = chapter_verse.split(":")
-            chapter = chapter.strip()
-            verse = int(verse.strip())
-
-            if book not in books:
-                books[book] = {}
-            if chapter not in books[book]:
-                books[book][chapter] = {}
-            books[book][chapter][verse] = text
-        else:
-            print(f"Skipping invalid line: {line.strip()}")
-
-# Function to determine the category of a book
-def get_category(book):
-    if book in ot_books:
-        return "Old Testament"
-    elif book in nt_books:
-        return "New Testament"
-    elif book in bom_books:
-        return "Book of Mormon"
-    elif book == "Doctrine and Covenants" or book.startswith("Official Declaration--"):
-        return "Doctrine and Covenants"
-    elif book in pogp_books or book.replace("--", "—") in pogp_books:
-        return "Pearl of Great Price"
-    else:
-        print(f"Warning: Unknown book '{book}' encountered.")
-        return None
-
-# Function to normalize book names for lookup in links_dict
-def normalize_book_name(book):
-    if book == "Doctrine and Covenants":
-        return "Sections"
-    elif book.startswith("Official Declaration--"):
-        num = book.split("--")[1]
-        return f"Official Declaration {num}"
-    else:
-        return book.replace("--", "—")  # Replace double hyphens with em dash
+# Function to clean name for front matter key
+def clean_key(name):
+    return name.lower().replace(' ', '_').replace('-', '_').replace('--', '_').replace("'", "").replace('(', '').replace(')', '')
 
 # Function to write a chapter file
-def write_chapter_file(file_path, book, chapter, verses, links_dict):
-    category = get_category(book)
-    if category:
-        # Define the tag based on the category
-        tag = {
-            "Old Testament": "Scripture/OT",
-            "New Testament": "Scripture/NT",
-            "Book of Mormon": "Scripture/BoM",
-            "Doctrine and Covenants": "Scripture/DandC",
-            "Pearl of Great Price": "Scripture/PoGP"
-        }[category]
-    else:
-        tag = ""
-
-    # Normalize the book name for looking up in links_dict
-    book_key = normalize_book_name(book)
-    # Retrieve chapter links
-    chapter_links = links_dict.get(book_key, {}).get(chapter, {})
-    url = chapter_links.get("url", "")
-    sci_url = chapter_links.get("sci_url", "")
-    bh_url = chapter_links.get("bh_url", "")
-    st_url = chapter_links.get("st_url", "")
-    ie_url = chapter_links.get("ie_url", "")  # Retrieve Isaiah Explained URL
-    blb_url = chapter_links.get("blb_url", "")
-
-    # Determine book_for_embed and section_for_embed for the embed link
-    if book == "Doctrine and Covenants":
-        book_for_embed = "Doctrine and Covenants"
-        section_for_embed = f"Section {chapter}"
-    elif book.startswith("Official Declaration--"):
-        num = book.split("--")[1]
-        book_for_embed = f"Official Declaration {num}"
-        section_for_embed = f"Official Declaration {num}"
-    else:
-        book_for_embed = book.replace("--", "—")
-        section_for_embed = f"{book_for_embed} {chapter}"
+def write_chapter_file(file_path, book_name, chapter_num, verses, resources_list, category):
+    tag = tag_map.get(category, "")
 
     with open(file_path, "w", encoding="utf-8") as f:
         # Write front matter
@@ -133,67 +65,29 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
         f.write("publish: true\n")
         f.write("tags:\n")
         f.write("  - no-graph\n")
-        
-        # Write scripture heading
         if tag:
             f.write(f"  - {tag}\n")
         f.write("cssclasses:\n")
         f.write("  - scriptures\n")
-        f.write(f"gospel_library_url: {url}\n")
-        f.write(f"citation_index_url: {sci_url}\n")
-        if category in ["Old Testament", "New Testament"]:
-            f.write(f"blue_letter_bible_url: {blb_url}\n")
-            if book_key != "Song of Solomon":
-                f.write(f"inline_jst_url: {st_url}\n")
-            if book_key == "Isaiah":
-                f.write(f"isaiah_explained_url: {ie_url}\n")
-        if category == "Doctrine and Covenants":
-            if 'hr_url' in chapter_links:
-                hr_url = chapter_links['hr_url']
-                if hr_url:
-                    f.write(f"historical_resources_url: {hr_url}\n")
-            jsp_keys = sorted([k for k in chapter_links if k.startswith('jsp_url_')])
-            for i, k in enumerate(jsp_keys, 1):
-                jsp_url = chapter_links[k]
-                if jsp_url:
-                    f.write(f"joseph_smith_papers_url_{i}: {jsp_url}\n")
+        # Loop through resources to add to front matter
+        for res in resources_list:
+            key = clean_key(res["name"]) + "_url"
+            f.write(f"{key}: {res['url']}\n")
         f.write("---\n")
 
         # Write chapter details with hyperlinks
-        f.write(">[!Properties]+ Chapter Details\n")
-        if category in ["Old Testament", "New Testament"]:
-            # Start with the base links for all Bible chapters
-            links = f">[Gospel Library]({url})    |    [Citation Index]({sci_url})    |    [Blue Letter Bible]({blb_url})"
-            # Add Inline JST only if the book is not Song of Solomon
-            if book_key != "Song of Solomon":
-                links += f"    |    [Inline JST]({st_url})"
-            # Add Isaiah Explained link for Isaiah chapters
-            if book_key == "Isaiah":
-                links += f"    |    [Isaiah Explained]({ie_url})"
-            f.write(links + "\n")
-        else:
-            links = f">[Gospel Library]({url})    |    [Citation Index]({sci_url})"
-            if 'hr_url' in chapter_links:
-                hr_url = chapter_links['hr_url']
-                if hr_url:
-                    links += f"    |    [Historical Resources]({hr_url})"
-            # Collect and add Joseph Smith Papers links
-            jsp_keys = sorted([k for k in chapter_links if k.startswith('jsp_url_')])
-            for i, k in enumerate(jsp_keys, 1):
-                jsp_url = chapter_links[k]
-                if jsp_url:
-                    links += f"    |    [JS Papers]({jsp_url})"
-            f.write(links + "\n")
+        f.write(">[!Properties]+ Resources\n")
+        links = "    |    ".join(f"[{res['name']}]({res['url']})" for res in resources_list)
+        f.write(f">{links}\n")
 
-        # Write Chapter Summary with embed link
-        f.write(f">>[!AI]- AI Context\n")
-        f.write(f">>%CONTEXT_SUMMARY%\n>\n")
-        f.write(f">>[!AI]- AI Child Summary\n")
-        f.write(f">>%CHILD_SUMMARY%\n>\n")
-        f.write(f">>[!AI]- AI Summary\n")
-        f.write(f">>%NORMAL_SUMMARY%\n")
-        f.write(f">\n>%TAGS%\n")
-
+        # Write AI summaries
+        f.write(">[!AI]- AI Context\n")
+        f.write(">>%CONTEXT_SUMMARY%\n>\n")
+        f.write(">[!AI]- AI Child Summary\n")
+        f.write(">>%CHILD_SUMMARY%\n>\n")
+        f.write(">[!AI]- AI Summary\n")
+        f.write(">>%NORMAL_SUMMARY%\n")
+        f.write(">\n>%TAGS%\n")
 
         # Write verses with verse number prepended to the text
         for verse_num in sorted(verses.keys()):
@@ -201,45 +95,49 @@ def write_chapter_file(file_path, book, chapter, verses, links_dict):
             f.write(f"###### {verse_num}\n")
             f.write(f"{verse_num} {verse_text}\n")
 
-# Create the folder structure and files
-for book in books:
-    category = get_category(book)
-    if not category:
-        continue
+# Process each category
+for category, json_filename in json_files.items():
+    json_file = os.path.join("lds_scriptures_json", json_filename)
+    with open(json_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        books_list = data.get(category, [])  # List of book dicts
 
-    # Updated to place category folders inside "Scriptures"
-    category_folder = os.path.join("Scriptures", category)
-    os.makedirs(category_folder, exist_ok=True)
+    for book_dict in books_list:
+        book_name = book_dict["name"]
+        if category != "Doctrine and Covenants":
+            order_list = book_orders[category]
+            try:
+                book_index = order_list.index(book_name.replace("--", "—")) + 1
+            except ValueError:
+                try:
+                    book_index = order_list.index(book_name) + 1
+                except ValueError:
+                    print(f"Warning: Book '{book_name}' not found in order list for {category}.")
+                    continue
+            book_for_folder = book_name.replace("—", "--")
+            full_book_folder = os.path.join("Scriptures", category, f"{book_index:02d} {book_for_folder}")
+            os.makedirs(full_book_folder, exist_ok=True)
+        else:
+            full_book_folder = os.path.join("Scriptures", category)
+            os.makedirs(full_book_folder, exist_ok=True)
 
-    if category == "Doctrine and Covenants":
-        if book == "Doctrine and Covenants":
-            for chapter in books[book]:
-                file_name = f"D&C {chapter}.md"
-                file_path = os.path.join(category_folder, file_name)
-                write_chapter_file(file_path, book, chapter, books[book][chapter], links_dict)
-        elif book.startswith("Official Declaration--"):
-            num = book.split("--")[1]
-            for chapter in books[book]:
-                file_name = f"Official Declaration {num}.md"
-                file_path = os.path.join(category_folder, file_name)
-                write_chapter_file(file_path, book, chapter, books[book][chapter], links_dict)
-    else:
-        book_list = {
-            "Old Testament": ot_books,
-            "New Testament": nt_books,
-            "Book of Mormon": bom_books,
-            "Pearl of Great Price": pogp_books
-        }[category]
-        # Normalize book name for folder creation
-        book_for_folder = book.replace("—", "--")
-        book_index = book_list.index(book_for_folder) + 1 if book_for_folder in book_list else book_list.index(book) + 1
-        book_folder = f"{book_index:02d} {book_for_folder}"
-        full_book_folder = os.path.join(category_folder, book_folder)
-        os.makedirs(full_book_folder, exist_ok=True)
+        for chapter_dict in book_dict["chapters"]:
+            chapter_num = chapter_dict["number"]
+            verses = {v["number"]: v["text"] for v in chapter_dict["verses"]}
+            resources_list = chapter_dict.get("chapter_resources", [])
 
-        for chapter in books[book]:
-            file_name = f"{book_for_folder} {chapter}.md"
+            if category == "Doctrine and Covenants":
+                if book_name == "Sections":
+                    file_name = f"D&C {chapter_num}.md"
+                elif "Official Declaration" in book_name:
+                    num = book_name.split()[-1]
+                    file_name = f"Official Declaration {num}.md"
+                else:
+                    continue  # Skip if not sections or OD
+            else:
+                file_name = f"{book_for_folder} {chapter_num}.md"
+
             file_path = os.path.join(full_book_folder, file_name)
-            write_chapter_file(file_path, book, chapter, books[book][chapter], links_dict)
+            write_chapter_file(file_path, book_name, chapter_num, verses, resources_list, category)
 
 print("Scripture files have been generated successfully.")

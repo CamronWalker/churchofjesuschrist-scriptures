@@ -2,13 +2,9 @@
     "Pearl of Great Price": [
         {
             "name": "Moses",
-            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses?lang=eng",
-            "sci_url": "https://scriptures.byu.edu/#::c191",
             "chapters": [
                 {
                     "number": 1,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/1?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19101::c19101",
                     "verses": [
                         {
                             "number": 1,
@@ -178,12 +174,20 @@
                             "number": 42,
                             "text": "(These words were spoken unto Moses in the mount, the name of which shall not be known among the children of men. And now they are spoken unto you. Show them not unto any except them that believe. Even so. Amen.)"
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/1?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19101::c19101"
+                        }
                     ]
                 },
                 {
                     "number": 2,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/2?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19102::c19102",
                     "verses": [
                         {
                             "number": 1,
@@ -309,12 +313,20 @@
                             "number": 31,
                             "text": "And I, God, saw everything that I had made, and, behold, all things which I had made were very good; and the evening and the morning were the sixth day."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/2?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19102::c19102"
+                        }
                     ]
                 },
                 {
                     "number": 3,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/3?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19103::c19103",
                     "verses": [
                         {
                             "number": 1,
@@ -416,12 +428,20 @@
                             "number": 25,
                             "text": "And they were both naked, the man and his wife, and were not ashamed."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/3?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19103::c19103"
+                        }
                     ]
                 },
                 {
                     "number": 4,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/4?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19104::c19104",
                     "verses": [
                         {
                             "number": 1,
@@ -551,12 +571,20 @@
                             "number": 32,
                             "text": "(And these are the words which I spake unto my servant Moses, and they are true even as I will; and I have spoken them unto you. See thou show them unto no man, until I command you, except to them that believe. Amen.)"
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/4?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19104::c19104"
+                        }
                     ]
                 },
                 {
                     "number": 5,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/5?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19105::c19105",
                     "verses": [
                         {
                             "number": 1,
@@ -794,12 +822,20 @@
                             "number": 59,
                             "text": "And thus all things were confirmed unto Adam, by an holy ordinance, and the Gospel preached, and a decree sent forth, that it should be in the world, until the end thereof; and thus it was. Amen."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/5?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19105::c19105"
+                        }
                     ]
                 },
                 {
                     "number": 6,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/6?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19106::c19106",
                     "verses": [
                         {
                             "number": 1,
@@ -1073,12 +1109,20 @@
                             "number": 68,
                             "text": "Behold, thou art one in me, a son of God; and thus may all become my sons. Amen."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/6?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19106::c19106"
+                        }
                     ]
                 },
                 {
                     "number": 7,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/7?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19107::c19107",
                     "verses": [
                         {
                             "number": 1,
@@ -1356,12 +1400,20 @@
                             "number": 69,
                             "text": "And Enoch and all his people walked with God, and he dwelt in the midst of Zion; and it came to pass that Zion was not, for God received it up into his own bosom; and from thence went forth the saying, Zion is Fled."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/7?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19107::c19107"
+                        }
                     ]
                 },
                 {
                     "number": 8,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/8?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19108::c19108",
                     "verses": [
                         {
                             "number": 1,
@@ -1483,22 +1535,38 @@
                             "number": 30,
                             "text": "And God said unto Noah: The end of all flesh is come before me, for the earth is filled with violence, and behold I will destroy all flesh from off the earth."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses/8?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19108::c19108"
+                        }
                     ]
                 }
             ],
             "abbr": "moses",
             "total_chapters": 8,
-            "book_id": 401
+            "book_id": 401,
+            "book_resources": [
+                {
+                    "name": "Gospel Library",
+                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/moses?lang=eng"
+                },
+                {
+                    "name": "Scripture Citation Index",
+                    "url": "https://scriptures.byu.edu/#::c191"
+                }
+            ]
         },
         {
             "name": "Abraham",
-            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr?lang=eng",
-            "sci_url": "https://scriptures.byu.edu/#::c192",
             "chapters": [
                 {
                     "number": 1,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr/1?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19201::c19201",
                     "verses": [
                         {
                             "number": 1,
@@ -1624,12 +1692,20 @@
                             "number": 31,
                             "text": "But the records of the fathers, even the patriarchs, concerning the right of Priesthood, the Lord my God preserved in mine own hands; therefore a knowledge of the beginning of the creation, and also of the planets, and of the stars, as they were made known unto the fathers, have I kept even unto this day, and I shall endeavor to write some of these things upon this record, for the benefit of my posterity that shall come after me."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr/1?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19201::c19201"
+                        }
                     ]
                 },
                 {
                     "number": 2,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr/2?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19202::c19202",
                     "verses": [
                         {
                             "number": 1,
@@ -1731,12 +1807,20 @@
                             "number": 25,
                             "text": "And it came to pass that I, Abraham, told Sarai, my wife, all that the Lord had said unto me--Therefore say unto them, I pray thee, thou art my sister, that it may be well with me for thy sake, and my soul shall live because of thee."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr/2?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19202::c19202"
+                        }
                     ]
                 },
                 {
                     "number": 3,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr/3?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19203::c19203",
                     "verses": [
                         {
                             "number": 1,
@@ -1850,12 +1934,20 @@
                             "number": 28,
                             "text": "And the second was angry, and kept not his first estate; and, at that day, many followed after him."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr/3?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19203::c19203"
+                        }
                     ]
                 },
                 {
                     "number": 4,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr/4?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19204::c19204",
                     "verses": [
                         {
                             "number": 1,
@@ -1981,12 +2073,20 @@
                             "number": 31,
                             "text": "And the Gods said: We will do everything that we have said, and organize them; and behold, they shall be very obedient. And it came to pass that it was from evening until morning they called night; and it came to pass that it was from morning until evening that they called day; and they numbered the sixth time."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr/4?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19204::c19204"
+                        }
                     ]
                 },
                 {
                     "number": 5,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr/5?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19205::c19205",
                     "verses": [
                         {
                             "number": 1,
@@ -2072,12 +2172,32 @@
                             "number": 21,
                             "text": "And Adam gave names to all cattle, to the fowl of the air, to every beast of the field; and for Adam, there was found an help meet for him."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr/5?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19205::c19205"
+                        }
                     ]
                 }
             ],
             "abbr": "abr",
             "total_chapters": 5,
-            "book_id": 402
+            "book_id": 402,
+            "book_resources": [
+                {
+                    "name": "Gospel Library",
+                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/abr?lang=eng"
+                },
+                {
+                    "name": "Scripture Citation Index",
+                    "url": "https://scriptures.byu.edu/#::c192"
+                }
+            ]
         },
         {
             "name": "Facsimiles",
@@ -2090,13 +2210,9 @@
         },
         {
             "name": "Joseph Smith\u2014Matthew",
-            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/js-m?lang=eng",
-            "sci_url": "https://scriptures.byu.edu/#::c194",
             "chapters": [
                 {
                     "number": 1,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/js-m/1?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19401::c19401",
                     "verses": [
                         {
                             "number": 1,
@@ -2318,22 +2434,38 @@
                             "number": 55,
                             "text": "And thus cometh the end of the wicked, according to the prophecy of Moses, saying: They shall be cut off from among the people; but the end of the earth is not yet, but by and by."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/js-m/1?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19401::c19401"
+                        }
                     ]
                 }
             ],
             "abbr": "js-m",
             "total_chapters": 1,
-            "book_id": 404
+            "book_id": 404,
+            "book_resources": [
+                {
+                    "name": "Gospel Library",
+                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/js-m?lang=eng"
+                },
+                {
+                    "name": "Scripture Citation Index",
+                    "url": "https://scriptures.byu.edu/#::c194"
+                }
+            ]
         },
         {
             "name": "Joseph Smith\u2014History",
-            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/js-h?lang=eng",
-            "sci_url": "https://scriptures.byu.edu/#::c195",
             "chapters": [
                 {
                     "number": 1,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/js-h/1?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19501::c19501",
                     "verses": [
                         {
                             "number": 1,
@@ -2635,22 +2767,38 @@
                             "number": 75,
                             "text": "We had been threatened with being mobbed, from time to time, and this, too, by professors of religion. And their intentions of mobbing us were only counteracted by the influence of my wife's father's family (under Divine providence), who had become very friendly to me, and who were opposed to mobs, and were willing that I should be allowed to continue the work of translation without interruption; and therefore offered and promised us protection from all unlawful proceedings, as far as in them lay."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/js-h/1?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19501::c19501"
+                        }
                     ]
                 }
             ],
             "abbr": "js-h",
             "total_chapters": 1,
-            "book_id": 405
+            "book_id": 405,
+            "book_resources": [
+                {
+                    "name": "Gospel Library",
+                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/js-h?lang=eng"
+                },
+                {
+                    "name": "Scripture Citation Index",
+                    "url": "https://scriptures.byu.edu/#::c195"
+                }
+            ]
         },
         {
             "name": "Articles of Faith",
-            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/a-of-f?lang=eng",
-            "sci_url": "https://scriptures.byu.edu/#::c196",
             "chapters": [
                 {
                     "number": 1,
-                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/a-of-f/1?lang=eng",
-                    "sci_url": "https://scriptures.byu.edu/#19601::c19601",
                     "verses": [
                         {
                             "number": 1,
@@ -2704,12 +2852,32 @@
                             "number": 13,
                             "text": "We believe in being honest, true, chaste, benevolent, virtuous, and in doing good to all men; indeed, we may say that we follow the admonition of Paul--We believe all things, we hope all things, we have endured many things, and hope to be able to endure all things. If there is anything virtuous, lovely, or of good report or praiseworthy, we seek after these things."
                         }
+                    ],
+                    "chapter_resources": [
+                        {
+                            "name": "Gospel Library",
+                            "url": "https://churchofjesuschrist.org/study/scriptures/pgp/a-of-f/1?lang=eng"
+                        },
+                        {
+                            "name": "Citation Index",
+                            "url": "https://scriptures.byu.edu/#19601::c19601"
+                        }
                     ]
                 }
             ],
             "abbr": "a-of-f",
             "total_chapters": 1,
-            "book_id": 406
+            "book_id": 406,
+            "book_resources": [
+                {
+                    "name": "Gospel Library",
+                    "url": "https://churchofjesuschrist.org/study/scriptures/pgp/a-of-f?lang=eng"
+                },
+                {
+                    "name": "Scripture Citation Index",
+                    "url": "https://scriptures.byu.edu/#::c196"
+                }
+            ]
         }
     ]
 }
