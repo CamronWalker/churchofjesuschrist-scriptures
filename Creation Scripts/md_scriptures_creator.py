@@ -56,8 +56,20 @@ def clean_key(name):
     return name.lower().replace(' ', '_').replace('-', '_').replace('--', '_').replace("'", "").replace('(', '').replace(')', '')
 
 # Function to write a chapter file
-def write_chapter_file(file_path, book_name, chapter_num, verses, resources_list, category):
+def write_chapter_file(file_path, book_name, chapter_num, verses, resources_list, category, ai_resources):
     tag = tag_map.get(category, "")
+
+    # Handle AI summaries
+    if ai_resources:
+        context_summary = ai_resources.get("context_summary", "NA")
+        child_summary = ai_resources.get("child_summary", "NA")
+        normal_summary = ai_resources.get("summary", "NA")
+        tags = ai_resources.get("tags", "")
+    else:
+        context_summary = "NA"
+        child_summary = "NA"
+        normal_summary = "NA"
+        tags = ""
 
     with open(file_path, "w", encoding="utf-8") as f:
         # Write front matter
@@ -82,12 +94,12 @@ def write_chapter_file(file_path, book_name, chapter_num, verses, resources_list
 
         # Write AI summaries
         f.write(">[!AI]- AI Context\n")
-        f.write(">>%CONTEXT_SUMMARY%\n>\n")
+        f.write(f">>{context_summary}\n>\n")
         f.write(">[!AI]- AI Child Summary\n")
-        f.write(">>%CHILD_SUMMARY%\n>\n")
+        f.write(f">>{child_summary}\n>\n")
         f.write(">[!AI]- AI Summary\n")
-        f.write(">>%NORMAL_SUMMARY%\n")
-        f.write(">\n>%TAGS%\n")
+        f.write(f">>{normal_summary}\n")
+        f.write(f">\n>{tags}\n")
 
         # Write verses with verse number prepended to the text
         for verse_num in sorted(verses.keys()):
@@ -125,6 +137,7 @@ for category, json_filename in json_files.items():
             chapter_num = chapter_dict["number"]
             verses = {v["number"]: v["text"] for v in chapter_dict["verses"]}
             resources_list = chapter_dict.get("chapter_resources", [])
+            ai_resources = chapter_dict.get("ai_resources", None)
 
             if category == "Doctrine and Covenants":
                 if book_name == "Sections":
@@ -138,6 +151,6 @@ for category, json_filename in json_files.items():
                 file_name = f"{book_for_folder} {chapter_num}.md"
 
             file_path = os.path.join(full_book_folder, file_name)
-            write_chapter_file(file_path, book_name, chapter_num, verses, resources_list, category)
+            write_chapter_file(file_path, book_name, chapter_num, verses, resources_list, category, ai_resources)
 
 print("Scripture files have been generated successfully.")

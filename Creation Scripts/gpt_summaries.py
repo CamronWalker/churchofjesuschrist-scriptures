@@ -3,8 +3,9 @@ import re
 import json
 from openai import OpenAI, RateLimitError
 import time
-import yaml
 from dotenv import load_dotenv
+import argparse
+from tqdm import tqdm
 
 # Load environment variables from .env file
 load_dotenv()
@@ -12,6 +13,20 @@ load_dotenv()
 # Set your OpenAI API key (retrieve from environment variable for security)
 api_key = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=api_key)
+
+# List of volume files
+volumes = [
+    "old_testament.json",
+    "new_testament.json",
+    "book_of_mormon.json",
+    "doctrine_and_covenants.json",
+    "pearl_of_great_price.json"
+]
+
+# Book aliases
+book_aliases = {
+    "D&C": "Doctrine and Covenants"
+}
 
 # Function to generate AI summaries using OpenAI
 def generate_ai_summaries(book, chapter, verses):
@@ -24,7 +39,7 @@ def generate_ai_summaries(book, chapter, verses):
         "1. A simple summary as if explaining to a young child (1-2 sentences).\n"
         "2. A normal detailed summary (2-3 sentences) capturing the main events, teachings, and themes.\n"
         "3. A short context summary including speaker, location, audience, etc. (1 sentence).\n"
-        "4. Also provide 1-3 of the most important tags that relate to this chapter. All talks should start with #Gospel/ and be separated by a space. Some examples could be #Gospel/Atonement #Gospel/Faith #Gospel/EndureToTheEnd all should be related to doctrine as taught by The Church of Jesus Christ of Latter-day Saints.\n"
+        "4. Also provide 1-3 of the most important tags that relate to this chapter. All tags should start with #Gospel/ and be separated by a space. Some examples could be #Gospel/Atonement #Gospel/Faith #Gospel/EndureToTheEnd all should be related to doctrine as taught by The Church of Jesus Christ of Latter-day Saints.\n"
         "NOTE: Don't start the summaries with 'In {book} {chapter},' or 'In this chapter' etc. Also, you're able to create wiki style links to other book chapter combos. Limit this to only a couple important links or none at all. [[]] Instructions on how to do this: a. Each Chapter has it's own page that you can link to verses with Obsidian's Header references # b. In Obsidian you can replace what is displayed using the bar syntax like this [[1 Nephi 1#5|1 Nephi 1:5-8]] the intent is to include the range as the display text to the first link in the verse but include the links to the rest of the verses but with no display text so that would make this example [[1 Nephi 1#5|1 Nephi 1:5-8]][[1 Nephi 1#6|]][[1 Nephi 1#7|]][[1 Nephi 1#8|]] c. for sections of D&C use [[D&C 1#5]] not Doctrine and Covenants spelled out. d. Be sure to link to each verse in the range with typical dash for ranges and commas, example: [[D&C 11#11|D&C 11:11–14, 24]][[D&C 11#12|]][[D&C 11#13|]][[D&C 11#14|]][[D&C 11#24|]]\n"
         f"Chapter text:\n{chapter_text}\n\n"
         "Output format:\n"
@@ -84,7 +99,7 @@ def generate_ai_summaries(book, chapter, verses):
             tags_str = " ".join(tags_lines)
             
             # To mitigate rate limits, add a delay between calls
-            time.sleep(0)  # delay; adjust based on your rate limit tier
+            time.sleep(1)  # delay; adjust based on your rate limit tier
             
             return child_summary, normal_summary, context_summary, tags_str
         except RateLimitError as e:
@@ -97,114 +112,142 @@ def generate_ai_summaries(book, chapter, verses):
     print(f"Max retries exceeded for {book} {chapter}")
     return "", "", "", ""
 
-# Function to extract book and chapter from file path
-def get_book_chapter(file_path):
-    filename = os.path.basename(file_path).replace('.md', '')
-    parts = file_path.split(os.sep)
-    category = parts[1] if len(parts) > 1 else ""
-    
-    if category == "Doctrine and Covenants":
-        if filename.startswith("D&C "):
-            book = "Doctrine and Covenants"
-            chapter = filename.split(" ")[1]
-        elif filename.startswith("Official Declaration "):
-            book = filename
-            chapter = "1"
-        else:
-            book = "Unknown"
-            chapter = "1"
-    else:
-        # For other categories, book is all but last part of filename, chapter is last
-        filename_parts = filename.split(" ")
-        chapter = filename_parts[-1]
-        book = " ".join(filename_parts[:-1])
-    
-    return book, chapter
+# Helper to find book in list of books
+def find_book(books, book_name):
+    for b in books:
+        if b["name"].lower() == book_name.lower():
+            return b
+    return None
 
-# Function to parse verses from MD file body
-def parse_verses(body_lines):
-    verses = {}
-    i = 0
-    while i < len(body_lines):
-        if body_lines[i].startswith("###### "):
-            verse_num = body_lines[i][7:].strip()
-            if i + 1 < len(body_lines) and not body_lines[i + 1].startswith("######"):
-                verse_line = body_lines[i + 1].strip()
-                # Expect format: "{verse_num} {text}"
-                if verse_line.startswith(verse_num + " "):
-                    text = verse_line[len(verse_num) + 1:].strip()
-                    verses[verse_num] = text
-                i += 1
-        i += 1
-    return verses
+# Helper to find chapter in list of chapters
+def find_chapter(chapters, chapter_num):
+    for c in chapters:
+        if str(c["number"]) == chapter_num:
+            return c
+    return None
 
-# Function to update MD file with summaries
-def update_md_file(file_path):
-    with open(file_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
-    
-    # Find frontmatter boundaries
-    if lines[0].strip() != "---":
-        print(f"Invalid frontmatter in {file_path}")
-        return
-    second_dash_index = None
-    for idx, line in enumerate(lines[1:], start=1):
-        if line.strip() == "---":
-            second_dash_index = idx
-            break
-    if second_dash_index is None:
-        print(f"No closing frontmatter in {file_path}")
-        return
-    
-    # Parse frontmatter
-    fm_content = "".join(lines[1:second_dash_index])
-    fm = yaml.safe_load(fm_content) or {}
-    
-    # Body lines
-    body_lines = lines[second_dash_index + 1:]
-    
-    # Parse verses
-    verses = parse_verses(body_lines)
-    if not verses:
-        print(f"No verses found in {file_path}")
-        return
-    
-    # Get book and chapter
-    book, chapter = get_book_chapter(file_path)
-    
-    # Generate summaries
-    child_summary, normal_summary, context_summary, tags_str = generate_ai_summaries(book, chapter, verses)
-    
-    # Update frontmatter
-    fm['child_summary'] = child_summary
-    fm['summary'] = normal_summary
-    fm['context_summary'] = context_summary
-    
-    # Replace placeholders in body
-    body = ''.join(body_lines)
-    body = body.replace('%TAGS%', tags_str)
-    body = body.replace('%CONTEXT_SUMMARY%', context_summary)
-    body = body.replace('%CHILD_SUMMARY%', child_summary)
-    body = body.replace('%NORMAL_SUMMARY%', normal_summary)
-    body_lines = body.splitlines(keepends=True)
-    
-    # Write back to file
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write("---\n")
-        yaml.dump(fm, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
-        f.write("---\n")
-        f.writelines(body_lines)
+# Function to update a specific chapter in the JSON
+def update_chapter(data, volume_name, books, book_name, chapter_num, file_path):
+    book = find_book(books, book_name)
+    if book:
+        chapter = find_chapter(book["chapters"], chapter_num)
+        if chapter:
+            print(f"Processing {book_name} {chapter_num}")
+            verses_list = chapter.get("verses", [])
+            verses = {str(v["number"]): v["text"] for v in verses_list}
+            if verses:
+                child, normal, context, tags = generate_ai_summaries(book_name, chapter_num, verses)
+                if "ai_resources" not in chapter:
+                    chapter["ai_resources"] = {}
+                chapter["ai_resources"]["child_summary"] = child
+                chapter["ai_resources"]["summary"] = normal
+                chapter["ai_resources"]["context_summary"] = context
+                chapter["ai_resources"]["tags"] = tags
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=4)
+                return True
+    return False
 
-# Traverse the Scriptures folder and update all .md files
-def main():
-    for root, dirs, files in os.walk("Scriptures"):
-        for file in files:
-            if file.endswith(".md"):
-                file_path = os.path.join(root, file)
-                print(f"Processing {file_path}")
-                update_md_file(file_path)
+# Function to update all chapters in a book
+def update_book(data, volume_name, books, book_name, file_path):
+    book = find_book(books, book_name)
+    if book:
+        chapters = book["chapters"]
+        total_chapters = len(chapters)
+        with tqdm(total=total_chapters, desc=f"Processing {book_name}", unit="chapter") as pbar:
+            for chapter in chapters:
+                chapter_num = str(chapter["number"])
+                verses_list = chapter.get("verses", [])
+                verses = {str(v["number"]): v["text"] for v in verses_list}
+                if verses:
+                    child, normal, context, tags = generate_ai_summaries(book_name, chapter_num, verses)
+                    if "ai_resources" not in chapter:
+                        chapter["ai_resources"] = {}
+                    chapter["ai_resources"]["child_summary"] = child
+                    chapter["ai_resources"]["summary"] = normal
+                    chapter["ai_resources"]["context_summary"] = context
+                    chapter["ai_resources"]["tags"] = tags
+                pbar.update(1)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        return True
+    return False
+
+# Function to update all books in a volume
+def update_volume(file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    volume_name = list(data.keys())[0]
+    books = data[volume_name]
+    total_chapters = sum(len(book["chapters"]) for book in books)
+    with tqdm(total=total_chapters, desc=f"Processing {volume_name}", unit="chapter") as pbar:
+        for book in books:
+            book_name = book["name"]
+            for chapter in book["chapters"]:
+                chapter_num = str(chapter["number"])
+                verses_list = chapter.get("verses", [])
+                verses = {str(v["number"]): v["text"] for v in verses_list}
+                if verses:
+                    child, normal, context, tags = generate_ai_summaries(book_name, chapter_num, verses)
+                    if "ai_resources" not in chapter:
+                        chapter["ai_resources"] = {}
+                    chapter["ai_resources"]["child_summary"] = child
+                    chapter["ai_resources"]["summary"] = normal
+                    chapter["ai_resources"]["context_summary"] = context
+                    chapter["ai_resources"]["tags"] = tags
+                pbar.update(1)
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Update AI summaries in JSON scripture files.")
+    parser.add_argument("-update", required=True, help="Volume file (e.g., new_testament.json), book (e.g., Matthew), or book chapter (e.g., Matthew 5)")
+    args = parser.parse_args()
 
-print("Summaries have been added to the scripture files successfully.")
+    target = args.update.strip()
+    processed = False
+
+    if target.endswith(".json"):
+        # Update entire volume
+        file_path = os.path.join("lds_scriptures_json", target)
+        if os.path.exists(file_path):
+            update_volume(file_path)
+            processed = True
+        else:
+            print(f"Volume file {target} not found.")
+    else:
+        parts = target.split()
+        is_chapter_update = len(parts) > 1 and re.match(r'^\d+$', parts[-1])
+        if is_chapter_update:
+            chapter_num = parts[-1]
+            book_input = ' '.join(parts[:-1])
+        else:
+            book_input = target
+            chapter_num = None
+
+        book_name = book_aliases.get(book_input, book_input)
+
+        for vol_file in volumes:
+            file_path = os.path.join("lds_scriptures_json", vol_file)
+            if not os.path.exists(file_path):
+                continue
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            volume_name = list(data.keys())[0]
+            books = data[volume_name]
+
+            if chapter_num is not None:
+                # Update specific chapter
+                if update_chapter(data, volume_name, books, book_name, chapter_num, file_path):
+                    processed = True
+                    break
+            else:
+                # Update entire book
+                if update_book(data, volume_name, books, book_name, file_path):
+                    processed = True
+                    break
+
+    if processed:
+        print("Summaries have been added to the scripture files successfully.")
+    else:
+        print("No updates performed.")
