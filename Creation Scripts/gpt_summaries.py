@@ -1,22 +1,22 @@
 import os
 import re
 import json
-from openai import OpenAI, RateLimitError
 import time
 from dotenv import load_dotenv
 import argparse
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from xai_sdk import Client
+from xai_sdk.chat import user
+from xai_sdk.search import SearchParameters, web_source
+from urllib.parse import urlparse
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Set your xAI API key (retrieve from environment variable for security)
 api_key = os.getenv('XAI_API_KEY')
-client = OpenAI(
-    api_key=api_key,
-    base_url="https://api.x.ai/v1"
-)
+client = Client(api_key=api_key)
 
 # List of volume files
 volumes = [
@@ -32,8 +32,35 @@ book_aliases = {
     "D&C": "Doctrine and Covenants"
 }
 
-# Function to generate AI summaries using xAI
-def generate_ai_summaries(book, chapter, verses, debug=False):
+def get_domain(url):
+    parsed = urlparse(url)
+    domain = parsed.netloc
+    if domain.startswith("www."):
+        domain = domain[4:]
+    return domain
+
+def parse_related_scriptures(s):
+    import re
+    s = s.strip("[] ")
+    parts = s.split(';')
+    result = []
+    for part in parts:
+        part = part.strip()
+        if part:
+            splitted = re.split(r'\s*~\s*', part, maxsplit=1)
+            if len(splitted) == 2:
+                link = splitted[0].strip()
+                desc = splitted[1].strip()
+                result.append({"link": link, "description": desc})
+    return result
+
+# Function to generate AI summaries using xAI SDK
+def generate_ai_summaries(book, chapter, verses, allowed_websites=None, debug=False):
+    if allowed_websites is None:
+        allowed_websites = []
+    if not allowed_websites:
+        allowed_websites = ["churchofjesuschrist.org", "scriptures.byu.edu"]
+    
     # Concatenate verses into a single text block
     chapter_text = "\n".join([f"Verse {verse}: {text}" for verse, text in sorted(verses.items(), key=lambda x: int(x[0]))])
     
@@ -44,13 +71,15 @@ def generate_ai_summaries(book, chapter, verses, debug=False):
         "2. A normal detailed summary (2-3 sentences) capturing the main events, teachings, and themes.\n"
         "3. A short context summary including speaker, location, audience, etc. (1 sentence).\n"
         "4. Also provide 1-3 of the most important tags that relate to this chapter. All tags should start with #Gospel/ and be separated by a space. Some examples could be #Gospel/Atonement #Gospel/Faith #Gospel/EndureToTheEnd all should be related to doctrine as taught by The Church of Jesus Christ of Latter-day Saints.\n"
+        "5. Search the internet for 1-3 related scriptures (chapters or specific verses) from other religious texts that share similar themes, teachings, or events. For each, provide the reference as a wiki link ~ a brief reason why it's related.\n"
         "NOTE: Don't start the summaries with 'In {book} {chapter},' or 'In this chapter' etc. Also, you're able to create wiki style links to other book chapter combos. Limit this to only a couple important links or none at all. An example would be the chapter from Isaiah that is simiar to those in 2 Nephi or other accounts from the different gospels could be a 'see also' John 1 etc. Instructions on how to format the wikilinks: [[]] a. Each Chapter has it's own page that you can link to verses with Obsidian's Header references # b. In Obsidian you can replace what is displayed using the bar syntax like this [[1 Nephi 1#5|1 Nephi 1:5-8]] the intent is to include the range as the display text to the first link in the verse but include the links to the rest of the verses but with no display text so that would make this example [[1 Nephi 1#5|1 Nephi 1:5-8]][[1 Nephi 1#6|]][[1 Nephi 1#7|]][[1 Nephi 1#8|]] c. for sections of D&C use [[D&C 1#5]] not Doctrine and Covenants spelled out. d. Be sure to link to each verse in the range with typical dash for ranges and commas, example: [[D&C 11#11|D&C 11:11–14, 24]][[D&C 11#12|]][[D&C 11#13|]][[D&C 11#14|]][[D&C 11#24|]]\n"
         f"Chapter text:\n{chapter_text}\n\n"
         "Output format:\n"
-        "Child Summary: [your child summary here]\n"
-        "Normal Summary: [your normal summary here]\n"
+        "Child Summary: [your child summary here—-max 50 words]\n"
+        "Normal Summary: [your normal summary here—-max 100 words and 1 - 2 optional links]\n"
         "Context Summary: [your context summary here]\n"
-        "Tags: [your tags here]"
+        "Tags: [your tags here]\n"
+        "Related Scriptures: [wikilink1 ~ brief reason; wikilink2 ~ brief reason; ...]"
     )
     
     if debug:
@@ -59,13 +88,26 @@ def generate_ai_summaries(book, chapter, verses, debug=False):
     max_retries = 5
     for attempt in range(max_retries):
         try:
-            response = client.chat.completions.create(
-                model="grok-4-0709",
-                messages=[{"role": "user", "content": prompt}],
+            chat = client.chat.create(
+                model="grok-4",
                 temperature=0.7,
-                max_tokens=500
+                max_tokens=4096,
+                search_parameters=SearchParameters(
+                    mode="auto",
+                    max_search_results=5,
+                    sources=[web_source(allowed_websites=allowed_websites)]
+                )
             )
-            output = response.choices[0].message.content.strip()
+            chat.append(user(prompt))
+            response = chat.sample()
+            
+            if debug:
+                print(f"Debug: Reasoning Content for {book} {chapter}:\n{response.reasoning_content}\n")
+                print(f"Debug: Full response for {book} {chapter}:\n{response}\n")
+                if hasattr(response, 'citations'):
+                    print(f"Debug: Citations: {response.citations}\n")
+            
+            output = response.content.strip()
             
             if debug:
                 print(f"Debug: Raw output for {book} {chapter}:\n{output}\n")
@@ -77,6 +119,7 @@ def generate_ai_summaries(book, chapter, verses, debug=False):
             normal_summary_lines = []
             context_summary_lines = []
             tags_lines = []
+            related_scriptures_lines = []
             
             for line in lines:
                 if line.startswith("Child Summary:"):
@@ -99,6 +142,11 @@ def generate_ai_summaries(book, chapter, verses, debug=False):
                     content = line.split(":", 1)[1].strip() if ":" in line else ""
                     if content:
                         current.append(content)
+                elif line.startswith("Related Scriptures:"):
+                    current = related_scriptures_lines
+                    content = line.split(":", 1)[1].strip() if ":" in line else ""
+                    if content:
+                        current.append(content)
                 else:
                     if current is not None and line.strip():
                         current.append(line.strip())
@@ -107,24 +155,32 @@ def generate_ai_summaries(book, chapter, verses, debug=False):
             normal_summary = " ".join(normal_summary_lines)
             context_summary = " ".join(context_summary_lines)
             tags_str = " ".join(tags_lines)
+            related_scriptures_str = " ".join(related_scriptures_lines)
+            
+            prompt_tokens = response.usage.prompt_tokens if hasattr(response.usage, 'prompt_tokens') else 0
+            completion_tokens = response.usage.completion_tokens
+            reasoning_tokens = response.usage.reasoning_tokens if hasattr(response.usage, 'reasoning_tokens') else 0
+            searches = response.usage.num_sources_used if hasattr(response.usage, 'num_sources_used') else 0
             
             if debug:
                 print(f"Debug: Parsed summaries for {book} {chapter}:")
                 print(f"Child: {child_summary}")
                 print(f"Normal: {normal_summary}")
                 print(f"Context: {context_summary}")
-                print(f"Tags: {tags_str}\n")
+                print(f"Tags: {tags_str}")
+                print(f"Related Scriptures Str: {related_scriptures_str}\n")
+                print(f"Input Tokens: {prompt_tokens}")
+                print(f"Completion Tokens: {completion_tokens}")
+                print(f"Reasoning Tokens: {reasoning_tokens}")
+                print(f"Searches: {searches}\n")
             
-            return child_summary, normal_summary, context_summary, tags_str
-        except RateLimitError as e:
-            wait_time = 2 ** attempt
-            print(f"Rate limit hit for {book} {chapter}: {e}. Retrying in {wait_time} seconds... (Attempt {attempt + 1}/{max_retries})")
-            time.sleep(wait_time)
+            return child_summary, normal_summary, context_summary, tags_str, related_scriptures_str, prompt_tokens, completion_tokens, reasoning_tokens, searches
         except Exception as e:
-            print(f"Error generating summary for {book} {chapter}: {e}")
-            return "", "", "", ""
+            wait_time = 2 ** attempt
+            print(f"Error generating summary for {book} {chapter}: {e}. Retrying in {wait_time} seconds... (Attempt {attempt + 1}/{max_retries})")
+            time.sleep(wait_time)
     print(f"Max retries exceeded for {book} {chapter}")
-    return "", "", "", ""
+    return "", "", "", "", "", 0, 0, 0, 0
 
 # Helper to find book in list of books
 def find_book(books, book_name):
@@ -147,18 +203,23 @@ def update_chapter(data, volume_name, books, book_name, chapter_num, file_path, 
         chapter = find_chapter(book["chapters"], chapter_num)
         if chapter:
             print(f"Processing {book_name} {chapter_num}")
+            resources = chapter.get("chapter_resources", [])
+            allowed_websites = list(set(get_domain(r["url"]) for r in resources if "url" in r))
             verses_list = chapter.get("verses", [])
             verses = {str(v["number"]): v["text"] for v in verses_list}
             if verses:
-                child, normal, context, tags = generate_ai_summaries(book_name, chapter_num, verses, debug=debug)
+                child, normal, context, tags, related_str, in_tokens, comp_tokens, reas_tokens, searches = generate_ai_summaries(book_name, chapter_num, verses, allowed_websites=allowed_websites, debug=debug)
+                related_list = parse_related_scriptures(related_str)
                 if "ai_resources" not in chapter:
                     chapter["ai_resources"] = {}
                 chapter["ai_resources"]["child_summary"] = child
                 chapter["ai_resources"]["summary"] = normal
                 chapter["ai_resources"]["context_summary"] = context
                 chapter["ai_resources"]["tags"] = tags
+                chapter["ai_resources"]["related_scriptures"] = related_list
                 with open(file_path, 'w', encoding='utf-8') as f:
                     json.dump(data, f, ensure_ascii=False, indent=4)
+                print(f"Sum for this operation - Input Tokens: {in_tokens}, Completion Tokens: {comp_tokens}, Reasoning Tokens: {reas_tokens}, Searches: {searches}")
                 return True
     return False
 
@@ -168,14 +229,20 @@ def update_book(data, volume_name, books, book_name, file_path, debug=False):
     if book:
         chapter_tasks = [(book_name, chapter) for chapter in book["chapters"]]
         total_chapters = len(chapter_tasks)
+        total_input = 0
+        total_completion = 0
+        total_reasoning = 0
+        total_searches = 0
 
         def process_chapter(task):
             bk_name, bk_chapter = task
             chapter_num = str(bk_chapter["number"])
+            resources = bk_chapter.get("chapter_resources", [])
+            allowed_websites = list(set(get_domain(r["url"]) for r in resources if "url" in r))
             verses_list = bk_chapter.get("verses", [])
             verses = {str(v["number"]): v["text"] for v in verses_list}
             if verses:
-                return bk_chapter, generate_ai_summaries(bk_name, chapter_num, verses, debug=debug)
+                return bk_chapter, generate_ai_summaries(bk_name, chapter_num, verses, allowed_websites=allowed_websites, debug=debug)
             return bk_chapter, None
 
         with ThreadPoolExecutor(max_workers=10) as executor:
@@ -183,16 +250,23 @@ def update_book(data, volume_name, books, book_name, file_path, debug=False):
             for future in tqdm(as_completed(futures), total=total_chapters, desc=f"Processing {book_name}", unit="chapter"):
                 chapter, result = future.result()
                 if result:
-                    child, normal, context, tags = result
+                    child, normal, context, tags, related_str, in_tokens, comp_tokens, reas_tokens, searches = result
+                    related_list = parse_related_scriptures(related_str)
                     if "ai_resources" not in chapter:
                         chapter["ai_resources"] = {}
                     chapter["ai_resources"]["child_summary"] = child
                     chapter["ai_resources"]["summary"] = normal
                     chapter["ai_resources"]["context_summary"] = context
                     chapter["ai_resources"]["tags"] = tags
+                    chapter["ai_resources"]["related_scriptures"] = related_list
+                    total_input += in_tokens
+                    total_completion += comp_tokens
+                    total_reasoning += reas_tokens
+                    total_searches += searches
 
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
+        print(f"Sum for the batch - Input Tokens: {total_input}, Completion Tokens: {total_completion}, Reasoning Tokens: {total_reasoning}, Searches: {total_searches}")
         return True
     return False
 
@@ -208,14 +282,20 @@ def update_volume(file_path, debug=False):
         for chapter in book["chapters"]:
             chapter_tasks.append((book_name, chapter))
     total_chapters = len(chapter_tasks)
+    total_input = 0
+    total_completion = 0
+    total_reasoning = 0
+    total_searches = 0
 
     def process_chapter(task):
         bk_name, bk_chapter = task
         chapter_num = str(bk_chapter["number"])
+        resources = bk_chapter.get("chapter_resources", [])
+        allowed_websites = list(set(get_domain(r["url"]) for r in resources if "url" in r))
         verses_list = bk_chapter.get("verses", [])
         verses = {str(v["number"]): v["text"] for v in verses_list}
         if verses:
-            return bk_chapter, generate_ai_summaries(bk_name, chapter_num, verses, debug=debug)
+            return bk_chapter, generate_ai_summaries(bk_name, chapter_num, verses, allowed_websites=allowed_websites, debug=debug)
         return bk_chapter, None
 
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -223,16 +303,23 @@ def update_volume(file_path, debug=False):
         for future in tqdm(as_completed(futures), total=total_chapters, desc=f"Processing {volume_name}", unit="chapter"):
             chapter, result = future.result()
             if result:
-                child, normal, context, tags = result
+                child, normal, context, tags, related_str, in_tokens, comp_tokens, reas_tokens, searches = result
+                related_list = parse_related_scriptures(related_str)
                 if "ai_resources" not in chapter:
                     chapter["ai_resources"] = {}
                 chapter["ai_resources"]["child_summary"] = child
                 chapter["ai_resources"]["summary"] = normal
                 chapter["ai_resources"]["context_summary"] = context
                 chapter["ai_resources"]["tags"] = tags
+                chapter["ai_resources"]["related_scriptures"] = related_list
+                total_input += in_tokens
+                total_completion += comp_tokens
+                total_reasoning += reas_tokens
+                total_searches += searches
 
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+    print(f"Sum for the batch - Input Tokens: {total_input}, Completion Tokens: {total_completion}, Reasoning Tokens: {total_reasoning}, Searches: {total_searches}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Update AI summaries in JSON scripture files.")
