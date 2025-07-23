@@ -6,13 +6,17 @@ import time
 from dotenv import load_dotenv
 import argparse
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Set your OpenAI API key (retrieve from environment variable for security)
-api_key = os.getenv('OPENAI_API_KEY')
-client = OpenAI(api_key=api_key)
+# Set your xAI API key (retrieve from environment variable for security)
+api_key = os.getenv('XAI_API_KEY')
+client = OpenAI(
+    api_key=api_key,
+    base_url="https://api.x.ai/v1"
+)
 
 # List of volume files
 volumes = [
@@ -28,8 +32,8 @@ book_aliases = {
     "D&C": "Doctrine and Covenants"
 }
 
-# Function to generate AI summaries using OpenAI
-def generate_ai_summaries(book, chapter, verses):
+# Function to generate AI summaries using xAI
+def generate_ai_summaries(book, chapter, verses, debug=False):
     # Concatenate verses into a single text block
     chapter_text = "\n".join([f"Verse {verse}: {text}" for verse, text in sorted(verses.items(), key=lambda x: int(x[0]))])
     
@@ -49,16 +53,22 @@ def generate_ai_summaries(book, chapter, verses):
         "Tags: [your tags here]"
     )
     
+    if debug:
+        print(f"Debug: Prompt for {book} {chapter}:\n{prompt}\n")
+    
     max_retries = 5
     for attempt in range(max_retries):
         try:
             response = client.chat.completions.create(
-                model="gpt-4.1",
+                model="grok-4-0709",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.7,
                 max_tokens=500
             )
             output = response.choices[0].message.content.strip()
+            
+            if debug:
+                print(f"Debug: Raw output for {book} {chapter}:\n{output}\n")
             
             # Better parsing to handle multi-line summaries
             lines = output.split("\n")
@@ -98,8 +108,12 @@ def generate_ai_summaries(book, chapter, verses):
             context_summary = " ".join(context_summary_lines)
             tags_str = " ".join(tags_lines)
             
-            # To mitigate rate limits, add a delay between calls
-            time.sleep(1)  # delay; adjust based on your rate limit tier
+            if debug:
+                print(f"Debug: Parsed summaries for {book} {chapter}:")
+                print(f"Child: {child_summary}")
+                print(f"Normal: {normal_summary}")
+                print(f"Context: {context_summary}")
+                print(f"Tags: {tags_str}\n")
             
             return child_summary, normal_summary, context_summary, tags_str
         except RateLimitError as e:
@@ -127,7 +141,7 @@ def find_chapter(chapters, chapter_num):
     return None
 
 # Function to update a specific chapter in the JSON
-def update_chapter(data, volume_name, books, book_name, chapter_num, file_path):
+def update_chapter(data, volume_name, books, book_name, chapter_num, file_path, debug=False):
     book = find_book(books, book_name)
     if book:
         chapter = find_chapter(book["chapters"], chapter_num)
@@ -136,7 +150,7 @@ def update_chapter(data, volume_name, books, book_name, chapter_num, file_path):
             verses_list = chapter.get("verses", [])
             verses = {str(v["number"]): v["text"] for v in verses_list}
             if verses:
-                child, normal, context, tags = generate_ai_summaries(book_name, chapter_num, verses)
+                child, normal, context, tags = generate_ai_summaries(book_name, chapter_num, verses, debug=debug)
                 if "ai_resources" not in chapter:
                     chapter["ai_resources"] = {}
                 chapter["ai_resources"]["child_summary"] = child
@@ -149,69 +163,92 @@ def update_chapter(data, volume_name, books, book_name, chapter_num, file_path):
     return False
 
 # Function to update all chapters in a book
-def update_book(data, volume_name, books, book_name, file_path):
+def update_book(data, volume_name, books, book_name, file_path, debug=False):
     book = find_book(books, book_name)
     if book:
-        chapters = book["chapters"]
-        total_chapters = len(chapters)
-        with tqdm(total=total_chapters, desc=f"Processing {book_name}", unit="chapter") as pbar:
-            for chapter in chapters:
-                chapter_num = str(chapter["number"])
-                verses_list = chapter.get("verses", [])
-                verses = {str(v["number"]): v["text"] for v in verses_list}
-                if verses:
-                    child, normal, context, tags = generate_ai_summaries(book_name, chapter_num, verses)
+        chapter_tasks = [(book_name, chapter) for chapter in book["chapters"]]
+        total_chapters = len(chapter_tasks)
+
+        def process_chapter(task):
+            bk_name, bk_chapter = task
+            chapter_num = str(bk_chapter["number"])
+            verses_list = bk_chapter.get("verses", [])
+            verses = {str(v["number"]): v["text"] for v in verses_list}
+            if verses:
+                return bk_chapter, generate_ai_summaries(bk_name, chapter_num, verses, debug=debug)
+            return bk_chapter, None
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(process_chapter, task) for task in chapter_tasks]
+            for future in tqdm(as_completed(futures), total=total_chapters, desc=f"Processing {book_name}", unit="chapter"):
+                chapter, result = future.result()
+                if result:
+                    child, normal, context, tags = result
                     if "ai_resources" not in chapter:
                         chapter["ai_resources"] = {}
                     chapter["ai_resources"]["child_summary"] = child
                     chapter["ai_resources"]["summary"] = normal
                     chapter["ai_resources"]["context_summary"] = context
                     chapter["ai_resources"]["tags"] = tags
-                pbar.update(1)
+
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         return True
     return False
 
 # Function to update all books in a volume
-def update_volume(file_path):
+def update_volume(file_path, debug=False):
     with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     volume_name = list(data.keys())[0]
     books = data[volume_name]
-    total_chapters = sum(len(book["chapters"]) for book in books)
-    with tqdm(total=total_chapters, desc=f"Processing {volume_name}", unit="chapter") as pbar:
-        for book in books:
-            book_name = book["name"]
-            for chapter in book["chapters"]:
-                chapter_num = str(chapter["number"])
-                verses_list = chapter.get("verses", [])
-                verses = {str(v["number"]): v["text"] for v in verses_list}
-                if verses:
-                    child, normal, context, tags = generate_ai_summaries(book_name, chapter_num, verses)
-                    if "ai_resources" not in chapter:
-                        chapter["ai_resources"] = {}
-                    chapter["ai_resources"]["child_summary"] = child
-                    chapter["ai_resources"]["summary"] = normal
-                    chapter["ai_resources"]["context_summary"] = context
-                    chapter["ai_resources"]["tags"] = tags
-                pbar.update(1)
+    chapter_tasks = []
+    for book in books:
+        book_name = book["name"]
+        for chapter in book["chapters"]:
+            chapter_tasks.append((book_name, chapter))
+    total_chapters = len(chapter_tasks)
+
+    def process_chapter(task):
+        bk_name, bk_chapter = task
+        chapter_num = str(bk_chapter["number"])
+        verses_list = bk_chapter.get("verses", [])
+        verses = {str(v["number"]): v["text"] for v in verses_list}
+        if verses:
+            return bk_chapter, generate_ai_summaries(bk_name, chapter_num, verses, debug=debug)
+        return bk_chapter, None
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(process_chapter, task) for task in chapter_tasks]
+        for future in tqdm(as_completed(futures), total=total_chapters, desc=f"Processing {volume_name}", unit="chapter"):
+            chapter, result = future.result()
+            if result:
+                child, normal, context, tags = result
+                if "ai_resources" not in chapter:
+                    chapter["ai_resources"] = {}
+                chapter["ai_resources"]["child_summary"] = child
+                chapter["ai_resources"]["summary"] = normal
+                chapter["ai_resources"]["context_summary"] = context
+                chapter["ai_resources"]["tags"] = tags
+
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Update AI summaries in JSON scripture files.")
     parser.add_argument("-update", required=True, help="Volume file (e.g., new_testament.json), book (e.g., Matthew), or book chapter (e.g., Matthew 5)")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
     target = args.update.strip()
     processed = False
+    debug = args.debug
 
     if target.endswith(".json"):
         # Update entire volume
         file_path = os.path.join("lds_scriptures_json", target)
         if os.path.exists(file_path):
-            update_volume(file_path)
+            update_volume(file_path, debug=debug)
             processed = True
         else:
             print(f"Volume file {target} not found.")
@@ -238,12 +275,12 @@ if __name__ == "__main__":
 
             if chapter_num is not None:
                 # Update specific chapter
-                if update_chapter(data, volume_name, books, book_name, chapter_num, file_path):
+                if update_chapter(data, volume_name, books, book_name, chapter_num, file_path, debug=debug):
                     processed = True
                     break
             else:
                 # Update entire book
-                if update_book(data, volume_name, books, book_name, file_path):
+                if update_book(data, volume_name, books, book_name, file_path, debug=debug):
                     processed = True
                     break
 
