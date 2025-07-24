@@ -1,3 +1,24 @@
+# This script generates AI-powered summaries for chapters in LDS scripture JSON files using the xAI SDK.
+# It supports updating entire volumes, specific books, or individual chapters.
+# Requires an XAI_API_KEY environment variable set in a .env file.
+# JSON files are expected in the 'lds_scriptures_json' directory.
+
+# Usage Examples:
+# 1. Update an entire volume:
+#    python3 gpt_summaries.py --update new_testament.json
+#
+# 2. Update all chapters in a specific book:
+#    python3 gpt_summaries.py --update Matthew
+#
+# 3. Update a specific chapter in a book:
+#    python3 gpt_summaries.py --update "Matthew 5"
+#
+# 4. Update with debug logging enabled:
+#    python3 gpt_summaries.py --update "Matthew 5" --debug
+#
+# Note: For books with aliases like "D&C", it will automatically map to "Doctrine and Covenants".
+# Ensure the JSON files (e.g., new_testament.json) contain the structured data with books, chapters, and verses.
+
 import os
 import re
 import json
@@ -329,7 +350,7 @@ def update_volume(file_path, debug=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Update AI summaries in JSON scripture files.")
-    parser.add_argument("-update", required=True, help="Volume file (e.g., new_testament.json), book (e.g., Matthew), or book chapter (e.g., Matthew 5)")
+    parser.add_argument("--update", required=True, help="Volume file (e.g., new_testament.json), book (e.g., Matthew), or book chapter (e.g., Matthew 5)")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
