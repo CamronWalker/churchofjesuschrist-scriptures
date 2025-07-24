@@ -89,7 +89,7 @@ def generate_ai_summaries(book, chapter, verses, allowed_websites=None, debug=Fa
     prompt = (
         f"Provide the following for '{book} {chapter}' from the scriptures:\n"
         f"1. Child Summary: A simple summary (1-2 sentences, max 50 words) as if explaining to a young child.\n"
-        f"2. Normal Summary: A detailed summary (2-3 sentences, max 100 words) capturing the main events, teachings, and themes. Could include references wiki-link references to verses from the same chapter (e.g., [[{book} {chapter}#1|v1-10 — 'description of event or theme']]) \n"
+        f"2. Normal Summary: A detailed summary (2-3 sentences, max 100 words) capturing the main events, teachings, and themes. Could include references wiki-link references to verses from the same chapter (e.g., [[{book} {chapter}#1|v1-10]] — description of event or theme) \n"
         f"3. Context Summary: A brief summary (1 sentence) including speaker, location, audience, and context.\n"
         f"4. Tags: Provide 1-3 doctrinal tags related to The Church of Jesus Christ of Latter-day Saints, starting with #Gospel/ (e.g., #Gospel/Atonement #Gospel/Faith #Gospel/EndureToTheEnd), separated by spaces.\n"
         f"5. Related Scriptures: Search the internet for 1-3 related scriptures (chapters or specific verses) from other religious texts with similar themes, teachings, or events. For each, provide a wiki-style link and a brief (max 25 words). Compare and contrast the reason for its relevance. Prioritize referencing to an entire chapter or shorter verse ranges and avoid ranges of greater than 5 verses.\n"
