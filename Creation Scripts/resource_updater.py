@@ -79,6 +79,9 @@ def generate_top_portion(resources_list, category, ai_resources):
         top_content += f"  - {tag}\n"
     top_content += "cssclasses:\n"
     top_content += "  - scriptures\n"
+    top_content += f"context_summary: {context_summary}\n"
+    top_content += f"child_summary: {child_summary}\n"
+    top_content += f"summary: {normal_summary}\n"
     # Loop through resources to add to front matter
     for res in resources_list:
         key = clean_key(res["name"]) + "_url"
