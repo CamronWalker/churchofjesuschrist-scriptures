@@ -1,5 +1,6 @@
 import os
 import json
+import re
 
 # Define the lists of books for each category in their standard order
 ot_books = [
@@ -84,7 +85,15 @@ def generate_top_portion(resources_list, category, ai_resources):
     top_content += f"summary: {normal_summary}\n"
     # Loop through resources to add to front matter
     for res in resources_list:
-        key = clean_key(res["name"]) + "_url"
+        if res["name"].startswith("CFM "):
+            match = re.search(r"CFM (\d{4})", res["name"])
+            if match:
+                year = match.group(1)
+                key = f"cfm_{year}_url"
+            else:
+                key = clean_key(res["name"]) + "_url"
+        else:
+            key = clean_key(res["name"]) + "_url"
         top_content += f"{key}: {res['url']}\n"
     top_content += "---\n"
 
