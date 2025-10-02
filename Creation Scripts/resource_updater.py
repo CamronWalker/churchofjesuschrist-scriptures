@@ -22,7 +22,7 @@ bom_books = [
     "Alma", "Helaman", "3 Nephi", "4 Nephi", "Mormon", "Ether", "Moroni"
 ]
 pogp_books = [
-    "Moses", "Abraham", "Joseph Smith--Matthew", "Joseph Smith--History", "Articles of Faith"
+    "Moses", "Abraham", "Joseph Smith—Matthew", "Joseph Smith—History", "Articles of Faith"
 ]
 dc_books = [
     "Doctrine and Covenants", "Official Declaration 1", "Official Declaration 2"
@@ -57,7 +57,7 @@ def clean_key(name):
     return name.lower().replace(' ', '_').replace('-', '_').replace('--', '_').replace("'", "").replace('(', '').replace(')', '')
 
 # Function to generate the top portion (frontmatter and callouts)
-def generate_top_portion(resources_list, category, ai_resources):
+def generate_top_portion(resources_list, category, ai_resources, book_name, chapter_num):
     tag = tag_map.get(category, "")
 
     # Handle AI summaries
@@ -83,6 +83,9 @@ def generate_top_portion(resources_list, category, ai_resources):
     top_content += f"context_summary: {context_summary}\n"
     top_content += f"child_summary: {child_summary}\n"
     top_content += f"summary: {normal_summary}\n"
+    top_content += f"volume: {category}\n"
+    top_content += f"book: {book_name}\n"
+    top_content += f"chapter: {chapter_num}\n"
     # Loop through resources to add to front matter
     for res in resources_list:
         if res["name"].startswith("CFM "):
@@ -122,8 +125,8 @@ def generate_verses(verses):
     return verses_content
 
 # Function to update a chapter file
-def update_chapter_file(file_path, verses, resources_list, category, ai_resources):
-    top_content = generate_top_portion(resources_list, category, ai_resources)
+def update_chapter_file(file_path, verses, resources_list, category, ai_resources, book_name, chapter_num):
+    top_content = generate_top_portion(resources_list, category, ai_resources, book_name, chapter_num)
 
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
@@ -172,6 +175,7 @@ for category, json_filename in json_files.items():
             book_for_folder = book_name.replace("—", "--")
             full_book_folder = os.path.join("Scriptures", category, f"{book_index:02d} {book_for_folder}")
             os.makedirs(full_book_folder, exist_ok=True)
+            book_fm = book_name
         else:
             full_book_folder = os.path.join("Scriptures", category)
             os.makedirs(full_book_folder, exist_ok=True)
@@ -184,16 +188,21 @@ for category, json_filename in json_files.items():
 
             if category == "Doctrine and Covenants":
                 if book_name == "Sections":
+                    book_fm = "Doctrine and Covenants"
+                    chapter_fm = chapter_num
                     file_name = f"D&C {chapter_num}.md"
                 elif "Official Declaration" in book_name:
                     num = book_name.split()[-1]
+                    book_fm = f"Official Declaration {num}"
+                    chapter_fm = chapter_num
                     file_name = f"Official Declaration {num}.md"
                 else:
                     continue  # Skip if not sections or OD
             else:
+                chapter_fm = chapter_num
                 file_name = f"{book_for_folder} {chapter_num}.md"
 
             file_path = os.path.join(full_book_folder, file_name)
-            update_chapter_file(file_path, verses, resources_list, category, ai_resources)
+            update_chapter_file(file_path, verses, resources_list, category, ai_resources, book_fm, chapter_fm)
 
 print("Scripture files have been updated successfully.")
