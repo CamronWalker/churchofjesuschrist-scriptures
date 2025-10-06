@@ -2,17 +2,24 @@ import os
 import json
 import time
 import sys
+import re
+import requests
 from urllib.parse import urlparse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-from openai import OpenAI
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+from dotenv import load_dotenv
 
-# Load .env if using dotenv, but since user mentioned os, use os.getenv
+# Load .env from parent directory
+load_dotenv(dotenv_path='../.env')
+
+# Now access the key
 XAI_API_KEY = os.getenv('XAI_API_KEY')
 
 # Book map for scripture abbreviations to full names
@@ -124,28 +131,40 @@ def get_wikilink(href, text):
         chapter = ''
         if len(parts) > 2:
             chapter = parts[2]
-        verses_str = parsed_url.query.split('id=')[1] if 'id=' in parsed_url.query else parsed_url.fragment[1:] if parsed_url.fragment else ''
-        verses_str = verses_str.replace('p', '', 1)  # remove 'p' prefix if present
+        verses_str = ''
+        if 'id' in parsed_url.query:
+            query_params = dict(q.split('=') for q in parsed_url.query.split('&'))
+            verses_str = query_params.get('id', '')
+        elif parsed_url.fragment:
+            verses_str = parsed_url.fragment[1:]
+        verses_str = verses_str.lower()
+        # Remove 'p' from the beginning case-insensitively
+        verses_str = re.sub(r'^p', '', verses_str)
         key = f"{corpus}/{book_abbr}"
         book_name = book_map.get(key)
         if not book_name:
             return None
         page_name = f"D&C {chapter}" if book_name == 'D&C' else f"{book_name} {chapter}"
         if not verses_str:
-            # If no verses, link to the chapter page
             return f"[[{page_name}|{text}]]"
         verse_parts = verses_str.split(',')
         all_verses = []
         for part in verse_parts:
             part = part.strip()
             if '-' in part:
-                start, end = map(int, part.split('-'))
-                all_verses.extend(range(start, end + 1))
+                range_parts = part.split('-')
+                start = re.sub(r'^p', '', range_parts[0], flags=re.IGNORECASE).strip()
+                end = re.sub(r'^p', '', range_parts[1], flags=re.IGNORECASE).strip() if len(range_parts) > 1 else ''
+                start_num = int(start) if start else None
+                end_num = int(end) if end else None
+                if start_num is not None and end_num is not None:
+                    all_verses.extend(range(start_num, end_num + 1))
             else:
-                v = int(part)
-                all_verses.append(v)
+                part_num = re.sub(r'^p', '', part, flags=re.IGNORECASE).strip()
+                if part_num:
+                    all_verses.append(int(part_num))
         if not all_verses:
-            return f"[[{page_name}|{text}]]"  # fallback to chapter if parsing fails
+            return f"[[{page_name}|{text}]]"
         md = f"[[{page_name}#{all_verses[0]}|{text}]]"
         for v in all_verses[1:]:
             md += f"[[{page_name}#{v}|]]"
@@ -154,21 +173,19 @@ def get_wikilink(href, text):
         print(f"Error parsing scripture link: {e}")
         return None
 
-import re
-
 def html_to_markdown(html, is_source=False):
     # Handle emphasis and bold
-    html = re.sub(r'<em>(.*?)</em>', r'*\1*', html, flags=re.IGNORECASE)
-    html = re.sub(r'<i>(.*?)</i>', r'*\1*', html, flags=re.IGNORECASE)
-    html = re.sub(r'<strong>(.*?)</strong>', r'**\1**', html, flags=re.IGNORECASE)
-    html = re.sub(r'<b>(.*?)</b>', r'**\1**', html, flags=re.IGNORECASE)
+    html = re.sub(r'<em>(.*?)</em>', r'*\1*', html, flags=re.IGNORECASE | re.DOTALL)
+    html = re.sub(r'<i>(.*?)</i>', r'*\1*', html, flags=re.IGNORECASE | re.DOTALL)
+    html = re.sub(r'<strong>(.*?)</strong>', r'**\1**', html, flags=re.IGNORECASE | re.DOTALL)
+    html = re.sub(r'<b>(.*?)</b>', r'**\1**', html, flags=re.IGNORECASE | re.DOTALL)
     # Remove spans
-    html = re.sub(r'<span[^>]*>(.*?)</span>', r'\1', html, flags=re.IGNORECASE)
+    html = re.sub(r'<span[^>]*>(.*?)</span>', r'\1', html, flags=re.IGNORECASE | re.DOTALL)
     # Handle footnotes sup
-    html = re.sub(r'<sup[^>]*><a[^>]+href="#([^"]+)"[^>]*>([^<]+)</a></sup>', r'[^ \1]', html, flags=re.IGNORECASE)
+    html = re.sub(r'<sup[^>]*><a[^>]+href="#([^"]+)"[^>]*>([^<]+)</a></sup>', r'[^ \1]', html, flags=re.IGNORECASE | re.DOTALL)
     # Remove backrefs in sources
     if is_source:
-        html = re.sub(r'<a[^>]+class="backref"[^>]*>.*?</a>', '', html, flags=re.IGNORECASE)
+        html = re.sub(r'<a[^>]+class="backref"[^>]*>.*?</a>', '', html, flags=re.IGNORECASE | re.DOTALL)
     # Handle links
     def link_repl(match):
         href = match.group(1)
@@ -178,7 +195,7 @@ def html_to_markdown(html, is_source=False):
         if wiki:
             return wiki
         return f"[{text}]({abs_href})"
-    html = re.sub(r'<a[^>]+href="([^"]+)"[^>]*>([^<]+)</a>', link_repl, html, flags=re.IGNORECASE)
+    html = re.sub(r'<a[^>]+href="([^"]+)"[^>]*>([^<]+)</a>', link_repl, html, flags=re.IGNORECASE | re.DOTALL)
     # Strip remaining tags
     html = re.sub(r'<[^>]+>', '', html)
     return html.strip()
@@ -214,33 +231,41 @@ def get_speaker_search_term(speaker, speaker_role):
 def find_newsroom_summary_url_with_grok(title, speaker, speaker_role, year, month):
     speaker_search = get_speaker_search_term(speaker, speaker_role)
     prompt = f'Find the URL of the Church News summary for the General Conference talk titled "{title}" by {speaker_search} from {month} {year}. Reply only with the URL if found, or "Not found" if not.'
-    client = OpenAI(api_key=XAI_API_KEY, base_url="https://api.x.ai/v1")
     try:
-        completion = client.chat.completions.create(
-            model='grok-4-fast',
-            messages=[{'role': 'user', 'content': prompt}],
-            search_parameters={
-                'mode': 'auto',
-                'return_citations': True,
-                'sources': [{'type': 'web', 'country': 'US'}],
-                'max_search_results': 3
+        response = requests.post(
+            'https://api.x.ai/v1/chat/completions',
+            headers={
+                'Authorization': f'Bearer {XAI_API_KEY}',
+                'Content-Type': 'application/json'
             },
-            stream=False
+            json={
+                'model': 'grok-4-fast',
+                'messages': [{'role': 'user', 'content': prompt}],
+                'search_parameters': {
+                    'mode': 'auto',
+                    'return_citations': True,
+                    'sources': [{'type': 'web', 'country': 'US'}],
+                    'max_search_results': 3
+                },
+                'stream': False
+            }
         )
-        content = completion.choices[0].message.content.strip()
+        response.raise_for_status()
+        data = response.json()
+        content = data['choices'][0]['message']['content'].strip()
         if content.startswith('http') and 'thechurchnews.com' in content:
             return content
         else:
             return None
     except Exception as e:
         print(f'Error finding newsroom summary URL with Grok for "{title}": {e}')
-        if hasattr(e, 'response') and e.response:
+        if e.response:
             print(f'Full API response: {json.dumps(e.response.json(), indent=2)}')
         return None
 
 def find_youtube_url(driver, title, speaker, year, month):
-    search_query = f"{title} – {speaker} – General Conference – {month} {year}"
     from urllib.parse import quote
+    search_query = f"{title} – {speaker} – General Conference – {month} {year}"
     encoded_query = quote(search_query)
     yt_channel = 'churchofjesuschristgeneralconf'
     yt_search_url = f"https://www.youtube.com/@{yt_channel}/search?query={encoded_query}"
@@ -255,13 +280,14 @@ def find_youtube_url(driver, title, speaker, year, month):
         print(f'Error finding YouTube URL for "{title}": {e}')
     return None
 
-def scrape_talk(url, session_name, year, month):
+def scrape_talk(url, session_name, year=None, month=None):
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
     options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
-    driver = webdriver.Chrome(options=options)
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
     talk_data = {}
     talk_data['session'] = session_name
     talk_data['url'] = url
@@ -467,7 +493,8 @@ def scrape_conference(year, month):
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(options=options)
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
     conference_data = {'conference': conference, 'sessions': {}}
     talk_list = []
     try:
@@ -556,15 +583,15 @@ def scrape_conference(year, month):
         for talks in conference_data['sessions'].values():
             for talk in talks:
                 talk['talk-resources'] = []
-                if 'url' in talk:
+                if 'url' in talk and talk['url']:
                     talk['talk-resources'].append({'name': "Gospel Library", 'url': talk['url']})
-                if 'saintsai_url' in talk:
+                if 'saintsai_url' in talk and talk['saintsai_url']:
                     talk['talk-resources'].append({'name': "Saints AI Study Guide", 'url': talk['saintsai_url']})
-                if 'byu_url' in talk:
+                if 'byu_url' in talk and talk['byu_url']:
                     talk['talk-resources'].append({'name': "BYU Citation Index", 'url': talk['byu_url']})
-                if 'youtube_url' in talk:
+                if 'youtube_url' in talk and talk['youtube_url']:
                     talk['talk-resources'].append({'name': "YouTube Video", 'url': talk['youtube_url']})
-                if 'newsroom_summary_url' in talk:
+                if 'newsroom_summary_url' in talk and talk['newsroom_summary_url']:
                     talk['talk-resources'].append({'name': "Church News Summary", 'url': talk['newsroom_summary_url']})
                 # Clean up individual fields
                 talk.pop('url', None)
@@ -601,7 +628,8 @@ def scrape_single_talk(url, session_name='Single Talk Session'):
             options.add_argument('--headless')
             options.add_argument('--disable-gpu')
             options.add_argument('--no-sandbox')
-            driver = webdriver.Chrome(options=options)
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
             try:
                 scrape_byu_talk_hashes(driver, byu_conf_url, {'sessions': {session_name: [talk]}}, conf_hash)
             except Exception as e:
@@ -623,15 +651,15 @@ def scrape_single_talk(url, session_name='Single Talk Session'):
         # Consolidate resources
         talk_data = conference_data['sessions'][session_name][0]
         talk_data['talk-resources'] = []
-        if 'url' in talk_data:
+        if 'url' in talk_data and talk_data['url']:
             talk_data['talk-resources'].append({'name': "Gospel Library", 'url': talk_data['url']})
-        if 'saintsai_url' in talk_data:
+        if 'saintsai_url' in talk_data and talk_data['saintsai_url']:
             talk_data['talk-resources'].append({'name': "Saints AI Study Guide", 'url': talk_data['saintsai_url']})
-        if 'byu_url' in talk_data:
+        if 'byu_url' in talk_data and talk_data['byu_url']:
             talk_data['talk-resources'].append({'name': "BYU Citation Index", 'url': talk_data['byu_url']})
-        if 'youtube_url' in talk_data:
+        if 'youtube_url' in talk_data and talk_data['youtube_url']:
             talk_data['talk-resources'].append({'name': "YouTube Video", 'url': talk_data['youtube_url']})
-        if 'newsroom_summary_url' in talk_data:
+        if 'newsroom_summary_url' in talk_data and talk_data['newsroom_summary_url']:
             talk_data['talk-resources'].append({'name': "Church News Summary", 'url': talk_data['newsroom_summary_url']})
         # Clean up individual fields
         talk_data.pop('url', None)
