@@ -1,3 +1,14 @@
+"""
+Sample Usage:
+- To scrape an entire General Conference:
+  python website_scraper.py 2023 October
+  (This will scrape all talks from the specified conference and save to a JSON file like '2023-october.json'. Note: Month must be 'April' or 'October'.)
+
+- To scrape a single talk:
+  python website_scraper.py https://www.churchofjesuschrist.org/study/general-conference/2023/10/12nelson?lang=eng
+  (This will scrape the individual talk, determine the conference, and add/update it in the corresponding conference JSON file like '2023-october.json'. If the file doesn't exist, it will create it with just that talk.)
+"""
+
 import os
 import json
 import time
@@ -18,9 +29,6 @@ from dotenv import load_dotenv
 
 # Load .env from parent directory
 load_dotenv(dotenv_path='../.env')
-
-# Now access the key
-XAI_API_KEY = os.getenv('XAI_API_KEY')
 
 # Book map for scripture abbreviations to full names
 book_map = {
@@ -214,55 +222,6 @@ def normalize_role(role):
     role = re.sub(r'President of The Church of Jesus Christ of Latter-day Saints|President of the Church', 'President of the Church', role, flags=re.IGNORECASE)
     return role
 
-def get_speaker_search_term(speaker, speaker_role):
-    prefix = ''
-    if speaker_role:
-        role_lower = speaker_role.lower()
-        if 'president of the church' in role_lower:
-            prefix = 'president '
-        elif 'quorum' in role_lower or 'seventy' in role_lower:
-            prefix = 'elder '
-        elif 'president' in role_lower:  # for general organization presidents, assuming women
-            prefix = 'sister '
-        # add more if needed, e.g., brother
-    last_name = speaker.split()[-1].lower()
-    return prefix + last_name
-
-def find_newsroom_summary_url_with_grok(title, speaker, speaker_role, year, month):
-    speaker_search = get_speaker_search_term(speaker, speaker_role)
-    prompt = f'Find the URL of the Church News summary for the General Conference talk titled "{title}" by {speaker_search} from {month} {year}. Reply only with the URL if found, or "Not found" if not.'
-    try:
-        response = requests.post(
-            'https://api.x.ai/v1/chat/completions',
-            headers={
-                'Authorization': f'Bearer {XAI_API_KEY}',
-                'Content-Type': 'application/json'
-            },
-            json={
-                'model': 'grok-4-fast',
-                'messages': [{'role': 'user', 'content': prompt}],
-                'search_parameters': {
-                    'mode': 'auto',
-                    'return_citations': True,
-                    'sources': [{'type': 'web', 'country': 'US'}],
-                    'max_search_results': 3
-                },
-                'stream': False
-            }
-        )
-        response.raise_for_status()
-        data = response.json()
-        content = data['choices'][0]['message']['content'].strip()
-        if content.startswith('http') and 'thechurchnews.com' in content:
-            return content
-        else:
-            return None
-    except Exception as e:
-        print(f'Error finding newsroom summary URL with Grok for "{title}": {e}')
-        if e.response:
-            print(f'Full API response: {json.dumps(e.response.json(), indent=2)}')
-        return None
-
 def find_youtube_url(driver, title, speaker, year, month):
     from urllib.parse import quote
     search_query = f"{title} – {speaker} – General Conference – {month} {year}"
@@ -294,7 +253,6 @@ def scrape_talk(url, session_name, year=None, month=None):
     talk_data['saintsai_url'] = url.replace('www.churchofjesuschrist.org', 'saintsai.org').split('?')[0] + '/study-guide'
     talk_data['byu_url'] = None
     talk_data['youtube_url'] = None
-    talk_data['newsroom_summary_url'] = None
     try:
         driver.get(url)
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
@@ -409,7 +367,6 @@ def scrape_talk(url, session_name, year=None, month=None):
         except:
             # No sources/footnotes found, no log
             pass
-
         # Extract year and month from URL if not provided
         if not year or not month:
             match = re.search(r'/general-conference/(\d{4})/(\d{2})/', url)
@@ -421,13 +378,11 @@ def scrape_talk(url, session_name, year=None, month=None):
                 print(f"Error: Could not extract year/month from URL {url}")
                 year = None
                 month = None
-
         # Find YouTube URL
         if year and month:
             talk_data['youtube_url'] = find_youtube_url(driver, talk_data['title'], talk_data['speaker'], year, month)
         else:
             talk_data['youtube_url'] = None
-
         # Check for errors
         is_session_or_audit = 'session' in talk_data['title'].lower() or 'auditing' in talk_data['title'].lower() or 'sustaining' in talk_data['title'].lower()
         if not is_session_or_audit:
@@ -483,6 +438,38 @@ def scrape_byu_talk_hashes(driver, byu_conf_url, conference_data, conf_hash):
         print(f"Error scraping BYU hashes: {e}")
     return conference_data
 
+def consolidate_resources(conference_data, conf_hash=None):
+    for session_name, talks in conference_data['sessions'].items():
+        for t in talks:
+            if 'talk-resources' not in t:
+                t['talk-resources'] = []
+            # Update or add each resource if the field is present
+            if 'url' in t:
+                t['talk-resources'] = [r for r in t['talk-resources'] if r['name'] != 'Gospel Library']
+                t['talk-resources'].append({'name': 'Gospel Library', 'url': t['url']})
+            if 'saintsai_url' in t:
+                t['talk-resources'] = [r for r in t['talk-resources'] if r['name'] != 'Saints AI Study Guide']
+                t['talk-resources'].append({'name': 'Saints AI Study Guide', 'url': t['saintsai_url']})
+            if 'byu_t_hash' in t or 'byu_url' in t:
+                t['talk-resources'] = [r for r in t['talk-resources'] if r['name'] != 'BYU Citation Index']
+                if 'byu_url' not in t and 'byu_t_hash' in t and conf_hash:
+                    t['byu_url'] = f"https://scriptures.byu.edu/#:t{t['byu_t_hash']}:g{conf_hash}"
+                if 'byu_url' in t:
+                    t['talk-resources'].append({'name': 'BYU Citation Index', 'url': t['byu_url']})
+            if 'youtube_url' in t:
+                t['talk-resources'] = [r for r in t['talk-resources'] if r['name'] != 'YouTube Video']
+                t['talk-resources'].append({'name': 'YouTube Video', 'url': t['youtube_url']})
+            if 'newsroom_summary_url' in t:
+                t['talk-resources'] = [r for r in t['talk-resources'] if r['name'] != 'Church News Summary']
+                t['talk-resources'].append({'name': 'Church News Summary', 'url': t['newsroom_summary_url']})
+            # Pop the individual fields
+            t.pop('url', None)
+            t.pop('saintsai_url', None)
+            t.pop('byu_url', None)
+            t.pop('youtube_url', None)
+            t.pop('newsroom_summary_url', None)
+            t.pop('byu_t_hash', None)
+
 def scrape_conference(year, month):
     month_code = '04' if month.lower() in ['apr', 'april'] else '10' if month.lower() in ['oct', 'october'] else None
     if not month_code:
@@ -495,7 +482,7 @@ def scrape_conference(year, month):
     options.add_argument('--no-sandbox')
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
-    conference_data = {'conference': conference, 'sessions': {}}
+    conference_data = {'conference': conference, 'year': year, 'month': month.capitalize(), 'sessions': {}}
     talk_list = []
     try:
         driver.get(conference_url)
@@ -563,43 +550,8 @@ def scrape_conference(year, month):
             scrape_byu_talk_hashes(driver, byu_conf_url, conference_data, conf_hash)
         except Exception as e:
             print(f"Error scraping BYU hashes: {e}")
-        # Parallelize newsroom summary fetches
-        all_talks = [talk for talks in conference_data['sessions'].values() for talk in talks]
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(find_newsroom_summary_url_with_grok, talk['title'], talk['speaker'], talk['speaker_role'], year, month) for talk in all_talks]
-            for future, talk in zip(as_completed(futures), all_talks):
-                url = future.result()
-                talk['newsroom_summary_url'] = url
-                if not url and int(year) > 2020:
-                    print(f"Warning: No newsroom summary found for recent talk \"{talk['title']}\" ({year})")
-        # Add BYU URLs
-        for talks in conference_data['sessions'].values():
-            for talk in talks:
-                if 'byu_t_hash' in talk:
-                    talk['byu_url'] = f"https://scriptures.byu.edu/#:t{talk['byu_t_hash']}:g{conf_hash}"
-                else:
-                    talk['byu_url'] = None
         # Consolidate resources
-        for talks in conference_data['sessions'].values():
-            for talk in talks:
-                talk['talk-resources'] = []
-                if 'url' in talk and talk['url']:
-                    talk['talk-resources'].append({'name': "Gospel Library", 'url': talk['url']})
-                if 'saintsai_url' in talk and talk['saintsai_url']:
-                    talk['talk-resources'].append({'name': "Saints AI Study Guide", 'url': talk['saintsai_url']})
-                if 'byu_url' in talk and talk['byu_url']:
-                    talk['talk-resources'].append({'name': "BYU Citation Index", 'url': talk['byu_url']})
-                if 'youtube_url' in talk and talk['youtube_url']:
-                    talk['talk-resources'].append({'name': "YouTube Video", 'url': talk['youtube_url']})
-                if 'newsroom_summary_url' in talk and talk['newsroom_summary_url']:
-                    talk['talk-resources'].append({'name': "Church News Summary", 'url': talk['newsroom_summary_url']})
-                # Clean up individual fields
-                talk.pop('url', None)
-                talk.pop('saintsai_url', None)
-                talk.pop('byu_url', None)
-                talk.pop('youtube_url', None)
-                talk.pop('newsroom_summary_url', None)
-                talk.pop('byu_t_hash', None)
+        consolidate_resources(conference_data, conf_hash)
         # Save the entire conference data to a single JSON file
         sanitized_conference = re.sub(r'[^a-z0-9\- ]', '', conference, flags=re.IGNORECASE)
         file_name = f"{sanitized_conference}.json"
@@ -610,71 +562,100 @@ def scrape_conference(year, month):
     finally:
         driver.quit()
 
-def scrape_single_talk(url, session_name='Single Talk Session'):
+def scrape_single_talk(url):
     match = re.search(r'/general-conference/(\d{4})/(\d{2})/', url)
     year = match.group(1) if match else None
     month_code = match.group(2) if match else None
     month = 'April' if month_code == '04' else 'October' if month_code == '10' else None
-    talk = scrape_talk(url, session_name, year, month)
-    if talk:
-        if match:
-            annual = 'A' if month_code == '04' else 'O'
-            year_num = int(year) - 1830
-            if annual == 'O':
-                year_num += 2048
-            conf_hash = format(year_num, 'x')
-            byu_conf_url = f"https://scriptures.byu.edu/#::g{conf_hash}"
-            options = Options()
-            options.add_argument('--headless')
-            options.add_argument('--disable-gpu')
-            options.add_argument('--no-sandbox')
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=options)
-            try:
-                scrape_byu_talk_hashes(driver, byu_conf_url, {'sessions': {session_name: [talk]}}, conf_hash)
-            except Exception as e:
-                print(f"Error fetching BYU hash for single talk: {e}")
-            finally:
-                driver.quit()
-            if 'byu_t_hash' in talk:
-                talk['byu_url'] = f"https://scriptures.byu.edu/#:t{talk['byu_t_hash']}:g{conf_hash}"
-        if year and month:
-            talk['newsroom_summary_url'] = find_newsroom_summary_url_with_grok(talk['title'], talk['speaker'], talk['speaker_role'], year, month)
-            if not talk['newsroom_summary_url'] and int(year) > 2020:
-                print(f"Warning: No newsroom summary found for recent talk \"{talk['title']}\" ({year})")
-        conference_data = {
-            'conference': 'Single Talk',
-            'sessions': {
-                session_name: [talk]
-            }
-        }
+    if not year or not month:
+        print("Error: Cannot determine conference from URL.")
+        return
+    conference = f"{year}-{month.capitalize()}"
+    filename = f"{year}-{month.lower()}.json"
+    conference_url = f"https://www.churchofjesuschrist.org/study/general-conference/{year}/{month_code}?lang=eng"
+    options = Options()
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--no-sandbox')
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+    try:
+        driver.get(conference_url)
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+        time.sleep(3)
+        # Scroll to load all if lazy
+        try:
+            for _ in range(5):
+                driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                time.sleep(1)
+        except Exception as e:
+            print(f"Error scrolling conference page: {e}")
+        # Find session for the talk
+        li_elements = driver.find_elements(By.CSS_SELECTOR, 'ul.doc-map > li')
+        current_session = 'Unknown Session'
+        session_name = 'Unknown Session'
+        talk_last_segment = url.split('/')[-1].split('?')[0]
+        found = False
+        for li in li_elements:
+            a = li.find_element(By.TAG_NAME, 'a')
+            href = a.get_attribute('href')
+            full_url = href if href.startswith('https') else f"https://www.churchofjesuschrist.org{href}"
+            last_seg = full_url.split('/')[-1].split('?')[0]
+            if re.match(r'^\d{2}[a-z]+$', last_seg, re.IGNORECASE):
+                if last_seg == talk_last_segment:
+                    session_name = current_session
+                    found = True
+                    break
+            else:
+                try:
+                    title_p = li.find_element(By.CSS_SELECTOR, 'p.title')
+                    current_session = title_p.text
+                except:
+                    current_session = 'Unknown Session'
+        if not found:
+            print(f"Warning: Could not find session for talk at {url}. Using 'Unknown Session'.")
+        # Scrape the talk
+        talk = scrape_talk(url, session_name, year, month)
+        if not talk:
+            print('Failed to scrape single talk')
+            return
+        # Load or create conference_data
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                conference_data = json.load(f)
+        else:
+            conference_data = {'conference': conference, 'year': year, 'month': month.capitalize(), 'sessions': {}}
+        # Add or update the talk
+        if session_name not in conference_data['sessions']:
+            conference_data['sessions'][session_name] = []
+        existing_talk = next((t for t in conference_data['sessions'][session_name] if t['title'] == talk['title']), None)
+        if existing_talk:
+            existing_talk.update(talk)
+            print(f"Updated talk '{talk['title']}' in {filename}")
+        else:
+            conference_data['sessions'][session_name].append(talk)
+            print(f"Added talk '{talk['title']}' to {filename}")
+        # Compute BYU hash
+        annual = 'A' if month_code == '04' else 'O'
+        year_num = int(year) - 1830
+        if annual == 'O':
+            year_num += 2048
+        conf_hash = format(year_num, 'x')
+        byu_conf_url = f"https://scriptures.byu.edu/#::g{conf_hash}"
+        # Scrape BYU hashes for all current talks
+        try:
+            scrape_byu_talk_hashes(driver, byu_conf_url, conference_data, conf_hash)
+        except Exception as e:
+            print(f"Error fetching BYU hashes: {e}")
         # Consolidate resources
-        talk_data = conference_data['sessions'][session_name][0]
-        talk_data['talk-resources'] = []
-        if 'url' in talk_data and talk_data['url']:
-            talk_data['talk-resources'].append({'name': "Gospel Library", 'url': talk_data['url']})
-        if 'saintsai_url' in talk_data and talk_data['saintsai_url']:
-            talk_data['talk-resources'].append({'name': "Saints AI Study Guide", 'url': talk_data['saintsai_url']})
-        if 'byu_url' in talk_data and talk_data['byu_url']:
-            talk_data['talk-resources'].append({'name': "BYU Citation Index", 'url': talk_data['byu_url']})
-        if 'youtube_url' in talk_data and talk_data['youtube_url']:
-            talk_data['talk-resources'].append({'name': "YouTube Video", 'url': talk_data['youtube_url']})
-        if 'newsroom_summary_url' in talk_data and talk_data['newsroom_summary_url']:
-            talk_data['talk-resources'].append({'name': "Church News Summary", 'url': talk_data['newsroom_summary_url']})
-        # Clean up individual fields
-        talk_data.pop('url', None)
-        talk_data.pop('saintsai_url', None)
-        talk_data.pop('byu_url', None)
-        talk_data.pop('youtube_url', None)
-        talk_data.pop('newsroom_summary_url', None)
-        talk_data.pop('byu_t_hash', None)
-
-        file_name = 'single_talk.json'
-        with open(file_name, 'w') as f:
+        consolidate_resources(conference_data, conf_hash)
+        # Save
+        with open(filename, 'w') as f:
             json.dump(conference_data, f, indent=2)
-        print(f"Single talk data saved to {file_name}")
-    else:
-        print('Failed to scrape single talk')
+    except Exception as e:
+        print(f"Error in scrape_single_talk: {e}")
+    finally:
+        driver.quit()
 
 if __name__ == '__main__':
     args = sys.argv[1:]
@@ -688,5 +669,5 @@ if __name__ == '__main__':
         else:
             print('Invalid URL')
     else:
-        print('Usage: python script.py <year> <month> or python script.py <talk_url>')
+        print('Usage: python website_scraper.py <year> <month> or python website_scraper.py <talk_url>')
         sys.exit(1)
